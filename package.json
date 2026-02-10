@@ -1,6 +1,6 @@
 {
-  "name": "seller-payout-intelligence",
-  "description": "Seller Payout Intelligence System - Real-time visibility into payout timelines, order breakdowns, and quality metrics",
+  "name": "seller-finance-management",
+  "description": "Seller Finance Management - Real-time visibility into payout timelines, order breakdowns, and quality metrics",
   "private": true,
   "version": "1.0.0",
   "type": "module",

@@ -1,4 +1,4 @@
-# Seller Payout Intelligence System
+# Seller Finance Management
 
 A comprehensive dashboard for sellers to track payout timelines, order breakdowns, quality metrics, and payout history in real-time.
 

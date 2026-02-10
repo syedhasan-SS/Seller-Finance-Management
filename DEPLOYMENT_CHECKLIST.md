@@ -1,6 +1,6 @@
 # ✅ Deployment Checklist
 
-Use this checklist to deploy your Seller Payout Intelligence System step-by-step.
+Use this checklist to deploy your Seller Finance Management step-by-step.
 
 ---
 
@@ -28,7 +28,7 @@ Use this checklist to deploy your Seller Payout Intelligence System step-by-step
 - [ ] Go to https://supabase.com/dashboard
 - [ ] Sign in or create free account
 - [ ] Click "New Project"
-- [ ] Enter name: `seller-payout-intelligence`
+- [ ] Enter name: `seller-finance-management`
 - [ ] Create database password and **save it**
 - [ ] Choose region (e.g., us-east-1)
 - [ ] Click "Create new project"
@@ -169,7 +169,7 @@ npm run dev
 
 #### ☐ Task 3.1: Create GitHub Repository (2 min)
 - [ ] Go to https://github.com/new
-- [ ] Repository name: `seller-payout-intelligence`
+- [ ] Repository name: `seller-finance-management`
 - [ ] Description: `Seller Payout Intelligence Dashboard`
 - [ ] Visibility: **Private** (recommended)
 - [ ] **DO NOT** check "Initialize with README"
@@ -184,7 +184,7 @@ npm run dev
 GitHub will show commands. Copy them and run in Terminal:
 
 ```bash
-git remote add origin https://github.com/YOUR_USERNAME/seller-payout-intelligence.git
+git remote add origin https://github.com/YOUR_USERNAME/seller-finance-management.git
 git branch -M main
 git push -u origin main
 ```
@@ -207,7 +207,7 @@ Replace `YOUR_USERNAME` with your actual GitHub username.
 - [ ] Sign in with GitHub
 - [ ] Authorize Vercel if prompted
 - [ ] Click "Import Git Repository"
-- [ ] Find `seller-payout-intelligence` in list
+- [ ] Find `seller-finance-management` in list
 - [ ] Click "Import"
 
 **✓ Success criteria**: Vercel shows "Configure Project" page
@@ -265,7 +265,7 @@ Scroll to "Environment Variables" section.
 ---
 
 #### ☐ Task 4.5: Get Your Live URL (1 min)
-- [ ] Copy your Vercel URL (looks like: `https://seller-payout-intelligence-xxxxx.vercel.app`)
+- [ ] Copy your Vercel URL (looks like: `https://seller-finance-management-xxxxx.vercel.app`)
 - [ ] Click "Visit" to open site
 - [ ] **Save this URL** (you need it for next phase)
 
@@ -285,11 +285,11 @@ Scroll to "Environment Variables" section.
 
 **Update Site URL**:
 - [ ] Change "Site URL" from `http://localhost:3000`
-- [ ] To your Vercel URL: `https://seller-payout-intelligence-xxxxx.vercel.app`
+- [ ] To your Vercel URL: `https://seller-finance-management-xxxxx.vercel.app`
 
 **Update Redirect URLs**:
 - [ ] Keep existing: `http://localhost:3000/**`
-- [ ] Add new: `https://seller-payout-intelligence-xxxxx.vercel.app/**`
+- [ ] Add new: `https://seller-finance-management-xxxxx.vercel.app/**`
 - [ ] (Replace with your actual Vercel URL)
 
 - [ ] Click "Save"
@@ -346,9 +346,9 @@ Scroll to "Environment Variables" section.
 
 #### ☐ Save Important URLs
 - [ ] Supabase Dashboard: https://supabase.com/dashboard
-- [ ] GitHub Repo: https://github.com/YOUR_USERNAME/seller-payout-intelligence
+- [ ] GitHub Repo: https://github.com/YOUR_USERNAME/seller-finance-management
 - [ ] Vercel Dashboard: https://vercel.com/dashboard
-- [ ] Live Site: https://seller-payout-intelligence-xxxxx.vercel.app
+- [ ] Live Site: https://seller-finance-management-xxxxx.vercel.app
 
 #### ☐ Document Credentials (Secure Location)
 - [ ] Supabase URL

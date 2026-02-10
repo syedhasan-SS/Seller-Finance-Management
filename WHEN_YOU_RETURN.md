@@ -130,7 +130,7 @@ npm install
 npm run dev
 
 # Push to GitHub (after creating repo)
-git remote add origin https://github.com/YOUR_USERNAME/seller-payout-intelligence.git
+git remote add origin https://github.com/YOUR_USERNAME/seller-finance-management.git
 git branch -M main
 git push -u origin main
 ```
@@ -335,5 +335,5 @@ LIVE! 🎉
 ---
 
 **Last Updated**: February 10, 2026
-**Your Project**: Seller Payout Intelligence System
+**Your Project**: Seller Finance Management
 **Status**: Ready for deployment ✅

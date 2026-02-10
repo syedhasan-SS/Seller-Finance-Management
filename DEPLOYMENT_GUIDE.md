@@ -1,4 +1,4 @@
-# Deployment Guide: Seller Payout Intelligence System
+# Deployment Guide: Seller Finance Management
 
 This guide will walk you through deploying your application to Vercel with Supabase backend.
 
@@ -22,7 +22,7 @@ This guide will walk you through deploying your application to Vercel with Supab
 
 2. **Fill in Project Details**
    - Organization: Select or create one
-   - Name: `seller-payout-intelligence`
+   - Name: `seller-finance-management`
    - Database Password: **SAVE THIS PASSWORD** (you'll need it for backups)
    - Region: Choose closest to your users (e.g., US East, EU West)
    - Plan: Free tier is fine for testing
@@ -158,7 +158,7 @@ git init
 git add .
 
 # Create initial commit
-git commit -m "Initial commit: Seller Payout Intelligence System ready for deployment"
+git commit -m "Initial commit: Seller Finance Management ready for deployment"
 ```
 
 ### Step 3.2: Create GitHub Repository
@@ -166,7 +166,7 @@ git commit -m "Initial commit: Seller Payout Intelligence System ready for deplo
 1. **Go to GitHub**: https://github.com/new
 
 2. **Fill in repository details**:
-   - Repository name: `seller-payout-intelligence`
+   - Repository name: `seller-finance-management`
    - Description: `Seller Payout Intelligence Dashboard with Supabase & Vercel`
    - Visibility: **Private** (recommended for business app)
    - **DO NOT** initialize with README, .gitignore, or license
@@ -178,7 +178,7 @@ git commit -m "Initial commit: Seller Payout Intelligence System ready for deplo
 
 2. **Run these commands** in your terminal:
    ```bash
-   git remote add origin https://github.com/YOUR_USERNAME/seller-payout-intelligence.git
+   git remote add origin https://github.com/YOUR_USERNAME/seller-finance-management.git
    git branch -M main
    git push -u origin main
    ```
@@ -197,7 +197,7 @@ git commit -m "Initial commit: Seller Payout Intelligence System ready for deplo
 
 2. **Import Git Repository**:
    - Click "Import Git Repository"
-   - Find your `seller-payout-intelligence` repository
+   - Find your `seller-finance-management` repository
    - Click "Import"
 
 ### Step 4.2: Configure Project Settings
@@ -228,7 +228,7 @@ git commit -m "Initial commit: Seller Payout Intelligence System ready for deplo
 
 1. **After deployment completes**:
    - You'll see: "🎉 Congratulations!"
-   - Your live URL will be shown: `https://seller-payout-intelligence-XXXXX.vercel.app`
+   - Your live URL will be shown: `https://seller-finance-management-XXXXX.vercel.app`
    - Click "Visit" to open your live site
 
 2. **Save this URL** - you'll need it for next step
@@ -245,11 +245,11 @@ git commit -m "Initial commit: Seller Payout Intelligence System ready for deplo
 
 3. **Update Site URL**:
    - Change from `http://localhost:3000`
-   - To: `https://seller-payout-intelligence-XXXXX.vercel.app` (your Vercel URL)
+   - To: `https://seller-finance-management-XXXXX.vercel.app` (your Vercel URL)
 
 4. **Update Redirect URLs**:
    - Keep: `http://localhost:3000/**`
-   - Add new: `https://seller-payout-intelligence-XXXXX.vercel.app/**`
+   - Add new: `https://seller-finance-management-XXXXX.vercel.app/**`
    - Click "Save"
 
 ### Step 5.2: Test Production Deployment
@@ -275,10 +275,10 @@ git commit -m "Initial commit: Seller Payout Intelligence System ready for deplo
 
 ## ✅ Deployment Complete!
 
-Your Seller Payout Intelligence System is now live! 🎉
+Your Seller Finance Management is now live! 🎉
 
 ### Your Live URLs:
-- **Production**: `https://seller-payout-intelligence-XXXXX.vercel.app`
+- **Production**: `https://seller-finance-management-XXXXX.vercel.app`
 - **Supabase Dashboard**: `https://supabase.com/dashboard/project/[your-project-id]`
 
 ### What's Configured:

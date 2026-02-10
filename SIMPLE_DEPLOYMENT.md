@@ -1,6 +1,6 @@
 # 🚀 Simple Deployment Guide (No Supabase Needed!)
 
-**Your Seller Payout Intelligence System is ready to deploy in 5 minutes!**
+**Your Seller Finance Management system is ready to deploy in 5 minutes!**
 
 Just like your Information Portal, this uses **local sample data** - no backend setup required.
 
@@ -22,7 +22,7 @@ Just like your Information Portal, this uses **local sample data** - no backend 
 ### Step 1: Create GitHub Repository (2 min)
 
 1. Go to: https://github.com/new
-2. Repository name: `seller-payout-intelligence`
+2. Repository name: `seller-finance-management`
 3. Visibility: **Private** or Public
 4. **DO NOT** check "Initialize with README"
 5. Click "Create repository"
@@ -34,7 +34,7 @@ GitHub will show commands. Copy and run them:
 ```bash
 cd /Users/syedfaezhasan/Downloads/project
 
-git remote add origin https://github.com/YOUR_USERNAME/seller-payout-intelligence.git
+git remote add origin https://github.com/YOUR_USERNAME/seller-finance-management.git
 git branch -M main
 git push -u origin main
 ```
@@ -46,7 +46,7 @@ Replace `YOUR_USERNAME` with your GitHub username.
 1. Go to: https://vercel.com/new
 2. Sign in with GitHub
 3. Click "Import Git Repository"
-4. Find `seller-payout-intelligence`
+4. Find `seller-finance-management`
 5. Click "Import"
 6. Settings should auto-detect:
    - Framework: **Vite** ✅
@@ -60,7 +60,7 @@ Replace `YOUR_USERNAME` with your GitHub username.
 
 ## 🎉 That's It!
 
-Your live URL will be: `https://seller-payout-intelligence-xxxxx.vercel.app`
+Your live URL will be: `https://seller-finance-management-xxxxx.vercel.app`
 
 **No environment variables needed!**
 **No Supabase account needed!**

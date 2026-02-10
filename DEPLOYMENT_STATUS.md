@@ -1,4 +1,4 @@
-# 🚀 Deployment Status: Seller Payout Intelligence System
+# 🚀 Deployment Status: Seller Finance Management
 
 **Last Updated**: February 10, 2026
 **Status**: ✅ Ready for Deployment
@@ -63,7 +63,7 @@
 2. Sign in or create account (free)
 3. Click "New Project"
 4. Fill in:
-   - Name: `seller-payout-intelligence`
+   - Name: `seller-finance-management`
    - Database Password: Create and save it
    - Region: Choose closest to you
 5. Wait 2-3 minutes for project creation
@@ -181,7 +181,7 @@ Open browser: http://localhost:3000
 
 **Instructions**:
 1. Go to: https://github.com/new
-2. Repository name: `seller-payout-intelligence`
+2. Repository name: `seller-finance-management`
 3. Visibility: **Private** (recommended)
 4. **DO NOT** check "Initialize with README"
 5. Click "Create repository"
@@ -197,7 +197,7 @@ Open browser: http://localhost:3000
 GitHub will show you commands like this (copy them):
 
 ```bash
-git remote add origin https://github.com/YOUR_USERNAME/seller-payout-intelligence.git
+git remote add origin https://github.com/YOUR_USERNAME/seller-finance-management.git
 git branch -M main
 git push -u origin main
 ```
@@ -221,7 +221,7 @@ Replace `YOUR_USERNAME` with your actual GitHub username.
 1. Go to: https://vercel.com/new
 2. Sign in with GitHub (authorize if needed)
 3. Click "Import Git Repository"
-4. Find `seller-payout-intelligence`
+4. Find `seller-finance-management`
 5. Click "Import"
 
 **9.2 Configure Settings**:
@@ -246,7 +246,7 @@ Click "Environment Variables" section.
 **9.4 Deploy**:
 1. Click "Deploy"
 2. Wait 2-3 minutes
-3. Copy your live URL: `https://seller-payout-intelligence-xxxxx.vercel.app`
+3. Copy your live URL: `https://seller-finance-management-xxxxx.vercel.app`
 
 ---
 
@@ -258,7 +258,7 @@ Click "Environment Variables" section.
 1. Go back to Supabase dashboard
 2. Authentication → URL Configuration
 3. **Site URL**: Change to your Vercel URL
-   - `https://seller-payout-intelligence-xxxxx.vercel.app`
+   - `https://seller-finance-management-xxxxx.vercel.app`
 4. **Redirect URLs**: Add your Vercel URL
    - Keep: `http://localhost:3000/**`
    - Add: `https://your-vercel-url.vercel.app/**`
@@ -349,9 +349,9 @@ npm run lint
 
 **URLs** (after deployment):
 - Supabase Dashboard: https://supabase.com/dashboard
-- GitHub Repo: https://github.com/YOUR_USERNAME/seller-payout-intelligence
+- GitHub Repo: https://github.com/YOUR_USERNAME/seller-finance-management
 - Vercel Dashboard: https://vercel.com/dashboard
-- Live Site: https://seller-payout-intelligence-xxxxx.vercel.app
+- Live Site: https://seller-finance-management-xxxxx.vercel.app
 
 ---
 
@@ -399,7 +399,7 @@ npm run lint
 
 ## ✨ You're Ready!
 
-Everything is prepared for a smooth deployment. Follow the steps above and you'll have your Seller Payout Intelligence System live in about 25 minutes!
+Everything is prepared for a smooth deployment. Follow the steps above and you'll have your Seller Finance Management live in about 25 minutes!
 
 **Questions?** See DEPLOYMENT_GUIDE.md for detailed explanations.
 
