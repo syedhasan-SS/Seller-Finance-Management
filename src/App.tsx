@@ -1,9 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from '@contexts/AuthContext';
-import { ProtectedRoute } from '@components/ProtectedRoute';
 
-const Login = lazy(() => import('@components/Login'));
 const Dashboard = lazy(() => import('@components/Dashboard'));
 
 const LoadingFallback = () => (
@@ -17,24 +14,14 @@ const LoadingFallback = () => (
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Suspense fallback={<LoadingFallback />}>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
-    </AuthProvider>
+    <BrowserRouter>
+      <Suspense fallback={<LoadingFallback />}>
+        <Routes>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </Suspense>
+    </BrowserRouter>
   );
 }
 

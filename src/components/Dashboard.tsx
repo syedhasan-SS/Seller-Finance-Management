@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { useAuth } from '@contexts/AuthContext';
-import { usePayoutData, useOrderDetail } from '@services/queries';
+import { samplePayoutData, sampleOrderDetails } from '../data/sampleData';
 import Header from './Header';
 import PayoutTimeline from './PayoutTimeline';
 import OrdersTable from './OrdersTable';
@@ -10,13 +9,11 @@ import PayoutHistory from './PayoutHistory';
 import OrderDetail from './OrderDetail';
 
 export const Dashboard: React.FC = () => {
-  const { user } = useAuth();
-  const sellerId = user?.user_metadata?.seller_id;
-
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
-  const { data: payoutData, isLoading, error } = usePayoutData(sellerId);
-  const { data: orderDetail } = useOrderDetail(selectedOrderId);
+  // Use sample data directly (no Supabase needed)
+  const payoutData = samplePayoutData;
+  const orderDetail = selectedOrderId ? sampleOrderDetails[selectedOrderId] : null;
 
   const handleOrderClick = (orderId: string) => {
     setSelectedOrderId(orderId);
@@ -24,28 +21,6 @@ export const Dashboard: React.FC = () => {
 
   const handleBackToDashboard = () => {
     setSelectedOrderId(null);
-  };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your payout data...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-lg max-w-md">
-          <p className="font-medium">Error loading payout data</p>
-          <p className="text-sm mt-1">{error instanceof Error ? error.message : 'An error occurred'}</p>
-        </div>
-      </div>
-    );
   }
 
   if (!payoutData) {
