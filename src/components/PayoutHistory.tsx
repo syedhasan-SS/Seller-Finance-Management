@@ -1,4 +1,4 @@
-import { CheckCircle, Clock, AlertCircle, Package } from 'lucide-react';
+import { CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { PayoutHistoryItem } from '../types';
 
 interface PayoutHistoryProps {
@@ -21,68 +21,68 @@ export default function PayoutHistory({ history }: PayoutHistoryProps) {
         return {
           icon: CheckCircle,
           label: 'Completed',
-          color: 'text-green-600',
-          bgColor: 'bg-green-100'
+          iconColor: 'text-emerald-600',
+          bgColor: 'bg-emerald-50',
+          borderColor: 'border-emerald-200'
         };
       case 'delayed':
         return {
           icon: Clock,
           label: 'Delayed',
-          color: 'text-yellow-600',
-          bgColor: 'bg-yellow-100'
+          iconColor: 'text-amber-600',
+          bgColor: 'bg-amber-50',
+          borderColor: 'border-amber-200'
         };
       case 'held':
         return {
           icon: AlertCircle,
           label: 'Held',
-          color: 'text-red-600',
-          bgColor: 'bg-red-100'
+          iconColor: 'text-red-600',
+          bgColor: 'bg-red-50',
+          borderColor: 'border-red-200'
         };
     }
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-        <h2 className="text-xl font-bold text-gray-800">Payout History</h2>
-        <p className="text-sm text-gray-600 mt-1">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="px-6 py-5">
+        <h2 className="text-xl font-semibold text-gray-900 mb-1">Payout History</h2>
+        <p className="text-sm text-gray-500">
           Last {history.length} payouts
         </p>
       </div>
 
-      <div className="p-6">
+      <div className="px-6 pb-6">
         <div className="relative">
-          <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200" />
+          <div className="absolute left-3.5 top-2 bottom-2 w-0.5 bg-gray-200" />
 
-          <div className="space-y-6">
+          <div className="space-y-4">
             {history.map((payout, index) => {
               const config = getStatusConfig(payout.status);
               const StatusIcon = config.icon;
 
               return (
                 <div key={index} className="relative flex gap-4">
-                  <div className={`relative z-10 flex items-center justify-center w-8 h-8 rounded-full ${config.bgColor}`}>
-                    <StatusIcon className={`w-4 h-4 ${config.color}`} />
+                  <div className={`relative z-10 flex items-center justify-center w-7 h-7 rounded-full ${config.bgColor} border ${config.borderColor} flex-shrink-0`}>
+                    <StatusIcon className={`w-4 h-4 ${config.iconColor}`} />
                   </div>
 
-                  <div className="flex-1 bg-gray-50 rounded-lg p-4 border border-gray-200 hover:border-gray-300 transition-colors">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <div className="font-semibold text-gray-900 mb-1">
+                  <div className="flex-1 pb-1">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900 text-sm mb-1">
                           {formatDate(payout.payoutDate)}
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${config.bgColor} ${config.color}`}>
-                            {config.label}
-                          </span>
-                          <span className="text-sm text-gray-600 flex items-center gap-1">
-                            <Package className="w-3.5 h-3.5" />
-                            {payout.orderCount} {payout.orderCount === 1 ? 'order' : 'orders'}
-                          </span>
+                        <div className="text-xs text-emerald-600 font-medium">
+                          {config.label}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-0.5">
+                          {payout.orderCount} {payout.orderCount === 1 ? 'order' : 'orders'}
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-xl font-bold text-gray-900">
+                        <div className="text-lg font-bold text-gray-900">
                           ${payout.amount.toFixed(2)}
                         </div>
                       </div>
@@ -94,7 +94,7 @@ export default function PayoutHistory({ history }: PayoutHistoryProps) {
           </div>
         </div>
 
-        <button className="mt-6 w-full py-2 text-center text-sm text-blue-600 hover:text-blue-700 font-medium border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+        <button className="mt-6 w-full py-2.5 text-center text-sm text-blue-600 hover:text-blue-700 font-medium border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
           View All Payouts
         </button>
       </div>

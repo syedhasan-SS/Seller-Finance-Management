@@ -37,15 +37,17 @@ export const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-50">
       <Header sellerId={payoutData.sellerId} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-6">
           <PayoutTimeline data={payoutData} />
 
-          <div className="grid lg:grid-cols-2 gap-6">
-            <OrdersTable orders={payoutData.orders} onOrderClick={handleOrderClick} />
+          <div className="grid lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <OrdersTable orders={payoutData.orders} onOrderClick={handleOrderClick} />
+            </div>
             <div className="space-y-6">
               <ActiveBlockers blockers={payoutData.activeBlockers} />
               <TrustScoreWidget trustScore={payoutData.trustScore} />
