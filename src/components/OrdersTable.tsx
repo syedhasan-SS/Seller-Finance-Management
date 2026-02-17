@@ -43,8 +43,11 @@ export default function OrdersTable({ orders, onOrderClick }: OrdersTableProps) 
     if (order.status === 'pending_eligibility' && order.daysUntilEligible) {
       return `Eligible in ${order.daysUntilEligible} days`;
     }
-    if (order.holdReasons.includes('RETURN_WINDOW')) {
-      return 'Return Window';
+    if (order.holdReasons && order.holdReasons.length > 0) {
+      if (order.holdReasons.includes('RETURN_WINDOW')) {
+        return 'Return Window';
+      }
+      return order.holdReasons[0];
     }
     return '';
   };
@@ -66,16 +69,22 @@ export default function OrdersTable({ orders, onOrderClick }: OrdersTableProps) 
                 Order ID
               </th>
               <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Completed Date
+                Product
               </th>
               <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Amount
+                Date
+              </th>
+              <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Base Price
+              </th>
+              <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Commission
+              </th>
+              <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Total Payout
               </th>
               <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Details
               </th>
             </tr>
           </thead>
@@ -91,14 +100,38 @@ export default function OrdersTable({ orders, onOrderClick }: OrdersTableProps) 
                     onClick={() => onOrderClick?.(order.orderId)}
                   >
                     <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">{order.orderId}</div>
+                      <div className="text-sm font-medium text-gray-900">{order.internalOrderId || order.orderId}</div>
+                      <div className="text-xs text-gray-500 mt-0.5">{order.orderId}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-gray-600">{formatDate(order.completedAt)}</div>
+                      <div className="text-sm text-gray-900 max-w-xs truncate" title={order.productName}>
+                        {order.productName || 'N/A'}
+                      </div>
+                      {order.includesShipping && (
+                        <span className="text-xs text-blue-600 mt-0.5 inline-block">+ Shipping</span>
+                      )}
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm font-semibold text-gray-900">
-                        ${order.amount.toFixed(2)}
+                      <div className="text-sm text-gray-600">{formatDate(order.createdAt || order.completedAt)}</div>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="text-sm text-gray-900">
+                        £{(order.originalFinalBase || order.amount).toFixed(2)}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="text-sm text-red-600">
+                        -{order.commissionPercentage ? `${order.commissionPercentage}%` : 'N/A'}
+                      </div>
+                      {order.originalCommission && (
+                        <div className="text-xs text-gray-500 mt-0.5">
+                          £{order.originalCommission.toFixed(2)}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="text-sm font-semibold text-emerald-700">
+                        £{(order.totalPaidAmount || order.amount).toFixed(2)}
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -106,11 +139,11 @@ export default function OrdersTable({ orders, onOrderClick }: OrdersTableProps) 
                         <StatusIcon className="w-3.5 h-3.5" />
                         {statusConfig.label}
                       </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-500">
-                        {getDetailsText(order)}
-                      </div>
+                      {getDetailsText(order) && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          {getDetailsText(order)}
+                        </div>
+                      )}
                     </td>
                 </tr>
               );
