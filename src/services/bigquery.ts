@@ -28,18 +28,28 @@ const PROJECT_ID = 'dogwood-baton-345622';
  */
 async function executeQuery<T = any>(sql: string): Promise<T[]> {
   try {
-    // Note: This would use the MCP BigQuery tool
-    // For now, returning mock data structure
-    console.log('Executing BigQuery query:', sql);
+    console.log('[BigQuery] Executing query:', sql.substring(0, 200) + '...');
 
-    // TODO: Implement actual MCP tool call
-    // const result = await mcp__bigquery__execute_sql({ sql, dry_run: false });
-    // return parseQueryResults(result);
+    // Call the MCP BigQuery tool
+    const result = await (globalThis as any).mcp__bigquery__execute_sql({
+      sql: sql,
+      dry_run: false
+    });
 
-    return [];
-  } catch (error) {
-    console.error('BigQuery query failed:', error);
-    throw new Error(`Failed to execute query: ${error.message}`);
+    // Parse the result - BigQuery returns newline-delimited JSON
+    if (!result || typeof result !== 'string') {
+      console.warn('[BigQuery] Query returned empty or invalid result');
+      return [];
+    }
+
+    const lines = result.split('\n').filter((line: string) => line.trim());
+    const parsedResults: T[] = lines.map((line: string) => JSON.parse(line));
+
+    console.log(`[BigQuery] Query returned ${parsedResults.length} rows`);
+    return parsedResults;
+  } catch (error: any) {
+    console.error('[BigQuery] Query failed:', error);
+    throw new Error(`Failed to execute query: ${error.message || error}`);
   }
 }
 
@@ -73,7 +83,7 @@ export async function getSellerPayoutData(vendorId: string): Promise<PayoutData>
       MIN(CASE WHEN status = 'pending_eligibility' THEN created_at END) AS earliest_pending_date,
       MAX(created_at) AS latest_order_date
     FROM \`${PROJECT_ID}.aurora_postgres_public.balance_transaction\`
-    WHERE destination_id = '${vendorId}'
+    WHERE CAST(destination_id AS INT64) = ${vendorId}
       AND _fivetran_deleted = FALSE
       AND status IN ('eligible', 'pending_eligibility')
       AND payout_id IS NULL
@@ -149,7 +159,7 @@ export async function getSellerOrders(
   const { status, search, limit = 100, offset = 0 } = filters || {};
 
   let whereClause = `
-    WHERE bt.destination_id = '${vendorId}'
+    WHERE CAST(bt.destination_id AS INT64) = ${vendorId}
       AND bt._fivetran_deleted = FALSE
       AND bt.status NOT IN ('failed', 'cancelled')
   `;
@@ -172,10 +182,21 @@ export async function getSellerOrders(
       vp.order_number,
       vp.internal_order_id,
       vp.title AS product_name,
+      vp.vendor,
+      vp.vendor_id,
       vp.customer_name,
-      bt.created_at AS completed_at,
-      bt.status,
-      bt.total_payable_smallest_unit / 100.0 AS amount_gbp,
+      bt.created_at,
+      vp.latest_status,
+      bt.status AS payout_status,
+      vp.includesShipping,
+      bt.final_base_smallest_unit / 100.0 AS original_final_base,
+      bt.commission_percentage,
+      (bt.final_base_smallest_unit / 100.0) * (bt.commission_percentage / 100.0) AS original_commission,
+      (bt.final_base_smallest_unit / 100.0) * (1 - (bt.commission_percentage / 100.0)) AS base_after_commission,
+      bt.shipping_amount_smallest_unit / 100.0 AS vendor_shipping_cost,
+      bt.refund_amount_smallest_unit / 100.0 AS supplier_refund,
+      bt.cancellation_fee_smallest_unit / 100.0 AS cancellation_fee,
+      bt.total_payable_smallest_unit / 100.0 AS total_paid_amount,
       vp.qc_status,
       vp.qc_time,
       vp.ff_status,
@@ -194,10 +215,21 @@ export async function getSellerOrders(
     order_number: number;
     internal_order_id: string;
     product_name: string;
+    vendor: string;
+    vendor_id: number;
     customer_name: string;
-    completed_at: string;
-    status: string;
-    amount_gbp: number;
+    created_at: string;
+    latest_status: string;
+    payout_status: string;
+    includesShipping: boolean;
+    original_final_base: number;
+    commission_percentage: number;
+    original_commission: number;
+    base_after_commission: number;
+    vendor_shipping_cost: number;
+    supplier_refund: number;
+    cancellation_fee: number;
+    total_paid_amount: number;
     qc_status: string;
     qc_time: string | null;
     ff_status: string;
@@ -207,7 +239,7 @@ export async function getSellerOrders(
   return results.map(row => {
     // Determine hold reasons based on status
     const holdReasons: string[] = [];
-    if (row.status === 'pending_eligibility') {
+    if (row.payout_status === 'pending_eligibility') {
       if (row.qc_status !== 'approved') {
         holdReasons.push(`QC Status: ${row.qc_status}`);
       }
@@ -229,15 +261,40 @@ export async function getSellerOrders(
     }
 
     return {
+      // Core identifiers
       orderId: row.order_id,
       orderNumber: row.order_number,
       internalOrderId: row.internal_order_id,
+
+      // Product & vendor info
       productName: row.product_name,
+      vendor: row.vendor,
+      vendorId: row.vendor_id,
       customerName: row.customer_name,
-      completedAt: row.completed_at,
+
+      // Status & dates (14 required fields)
+      payoutStatus: row.payout_status as any,
+      createdAt: row.created_at,
+      latestStatus: row.latest_status,
+      completedAt: row.created_at, // backward compatibility
       eligibilityDate,
-      status: row.status as any,
-      amount: row.amount_gbp,
+
+      // Financial details (14 required fields)
+      originalFinalBase: row.original_final_base,
+      commissionPercentage: row.commission_percentage,
+      originalCommission: row.original_commission,
+      baseAfterCommission: row.base_after_commission,
+      vendorShippingCost: row.vendor_shipping_cost,
+      supplierRefund: row.supplier_refund,
+      cancellationFee: row.cancellation_fee,
+      totalPaidAmount: row.total_paid_amount,
+
+      // Shipping flag (14 required fields)
+      includesShipping: row.includesShipping || false,
+
+      // Legacy fields (backward compatibility)
+      status: row.payout_status as any,
+      amount: row.total_paid_amount,
       qcStatus: row.qc_status,
       ffStatus: row.ff_status,
       holdReasons: holdReasons.length > 0 ? holdReasons : undefined,
@@ -274,7 +331,7 @@ export async function getPayoutHistory(
     FROM \`${PROJECT_ID}.aurora_postgres_public.payout\` p
     LEFT JOIN \`${PROJECT_ID}.aurora_postgres_public.balance_transaction\` bt
       ON bt.payout_id = p.id
-    WHERE p.destination_id = '${vendorId}'
+    WHERE CAST(p.destination_id AS INT64) = ${vendorId}
       AND p._fivetran_deleted = FALSE
     GROUP BY p.id, p.created_at, p.amount_smallest_unit, p.status
     ORDER BY p.created_at DESC
@@ -314,7 +371,7 @@ export async function getIncomeStatements(vendorId: string): Promise<any[]> {
     FROM \`${PROJECT_ID}.aurora_postgres_public.payout\` p
     LEFT JOIN \`${PROJECT_ID}.aurora_postgres_public.balance_transaction\` bt
       ON bt.payout_id = p.id
-    WHERE p.destination_id = '${vendorId}'
+    WHERE CAST(p.destination_id AS INT64) = ${vendorId}
       AND p._fivetran_deleted = FALSE
     GROUP BY p.id, p.created_at, p.amount_smallest_unit, p.status
     ORDER BY p.created_at DESC
@@ -353,7 +410,7 @@ export async function getStatementDetail(payoutId: number, vendorId: string): Pr
     LEFT JOIN \`${PROJECT_ID}.fleek_analytics.vendor_payout\` vp
       ON bt.order_line_id = CAST(vp.order_line_id AS STRING)
     WHERE bt.payout_id = ${payoutId}
-      AND bt.destination_id = '${vendorId}'
+      AND CAST(bt.destination_id AS INT64) = ${vendorId}
       AND bt._fivetran_deleted = FALSE
     ORDER BY bt.created_at DESC
   `;
@@ -397,7 +454,7 @@ async function getActiveBlockers(vendorId: string): Promise<ActiveBlocker[]> {
     FROM \`${PROJECT_ID}.aurora_postgres_public.balance_transaction\` bt
     LEFT JOIN \`${PROJECT_ID}.fleek_analytics.vendor_payout\` vp
       ON bt.order_line_id = CAST(vp.order_line_id AS STRING)
-    WHERE bt.destination_id = '${vendorId}'
+    WHERE CAST(bt.destination_id AS INT64) = ${vendorId}
       AND bt._fivetran_deleted = FALSE
       AND bt.status IN ('held', 'pending_eligibility')
       AND bt.payout_id IS NULL

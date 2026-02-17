@@ -1,13 +1,38 @@
 export interface Order {
-  orderId: string;
+  // Core identifiers
+  orderId: string; // order_line_id
   orderNumber?: number;
-  internalOrderId?: string;
-  productName?: string;
+  internalOrderId: string; // internal_order_id (REQUIRED per user spec)
+
+  // Product & vendor info
+  productName: string; // title (REQUIRED per user spec)
+  vendor: string; // vendor handle (REQUIRED per user spec)
+  vendorId?: number;
   customerName?: string;
-  completedAt: string;
+
+  // Status & dates
+  payoutStatus: 'eligible' | 'pending_eligibility' | 'held' | 'paid' | 'failed' | 'cancelled'; // status (REQUIRED per user spec)
+  createdAt: string; // created_at (REQUIRED per user spec)
+  latestStatus: string; // latest_status (REQUIRED per user spec)
+  completedAt: string; // backward compatibility
   eligibilityDate: string | null;
-  status: 'eligible' | 'pending_eligibility' | 'held' | 'paid';
-  amount: number;
+
+  // Financial details (all in GBP) - USER SPECIFIED FIELDS
+  originalFinalBase: number; // final_base_smallest_unit / 100 (REQUIRED)
+  commissionPercentage: number; // commission_percentage (REQUIRED)
+  originalCommission: number; // calculated: originalFinalBase * commissionPercentage / 100 (REQUIRED)
+  baseAfterCommission: number; // calculated: originalFinalBase - originalCommission (REQUIRED)
+  vendorShippingCost: number; // shipping_amount_smallest_unit / 100 (REQUIRED)
+  supplierRefund: number; // refund_amount_smallest_unit / 100 (REQUIRED)
+  cancellationFee: number; // cancellation_fee_smallest_unit / 100 (REQUIRED)
+  totalPaidAmount: number; // total_payable_smallest_unit / 100 (REQUIRED)
+
+  // Shipping flag
+  includesShipping: boolean; // includesShipping (REQUIRED per user spec)
+
+  // Legacy/convenience fields (backward compatibility)
+  status: 'eligible' | 'pending_eligibility' | 'held' | 'paid'; // alias for payoutStatus
+  amount: number; // alias for totalPaidAmount
   qcStatus?: string;
   ffStatus?: string;
   holdReasons?: string[];
