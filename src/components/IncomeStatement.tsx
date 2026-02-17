@@ -1,273 +1,273 @@
-import React from 'react';
-import { ArrowLeft, Download, Calendar } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowLeft, Search, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { samplePayoutData } from '../data/sampleData';
 import Header from './Header';
+
+// Sample income statement data
+const incomeStatements = [
+  {
+    id: 'PK2NBY8TW72-2026-008',
+    period: '16 Feb 2026 - 22 Feb 2026',
+    releasedAmount: 110.18,
+    status: 'Ready to Release',
+    expectedPayoutDate: '25 Feb 2026'
+  },
+  {
+    id: 'PK2NBY8TW72-2026-007',
+    period: '09 Feb 2026 - 15 Feb 2026',
+    releasedAmount: 662.45,
+    status: 'Ready to Release',
+    expectedPayoutDate: '18 Feb 2026'
+  },
+  {
+    id: 'PK2NBY8TW72-2026-006',
+    period: '02 Feb 2026 - 08 Feb 2026',
+    releasedAmount: 449.78,
+    status: 'Ready to Release',
+    expectedPayoutDate: '11 Feb 2026'
+  },
+  {
+    id: 'PK2NBY8TW72-2026-005',
+    period: '26 Jan 2026 - 01 Feb 2026',
+    releasedAmount: 224.86,
+    status: 'Ready to Release',
+    expectedPayoutDate: '04 Feb 2026'
+  },
+  {
+    id: 'PK2NBY8TW72-2026-004',
+    period: '19 Jan 2026 - 25 Jan 2026',
+    releasedAmount: 309.85,
+    status: 'Released',
+    expectedPayoutDate: '28 Jan 2026'
+  },
+  {
+    id: 'PK2NBY8TW72-2026-003',
+    period: '12 Jan 2026 - 18 Jan 2026',
+    releasedAmount: 2350.15,
+    status: 'Released',
+    expectedPayoutDate: '21 Jan 2026'
+  },
+  {
+    id: 'PK2NBY8TW72-2026-002',
+    period: '05 Jan 2026 - 11 Jan 2026',
+    releasedAmount: 2755.95,
+    status: 'Released',
+    expectedPayoutDate: '14 Jan 2026'
+  },
+  {
+    id: 'PK2NBY8TW72-2026-001',
+    period: '29 Dec 2025 - 04 Jan 2026',
+    releasedAmount: 1180.02,
+    status: 'Released',
+    expectedPayoutDate: '07 Jan 2026'
+  }
+];
 
 export const IncomeStatement: React.FC = () => {
   const navigate = useNavigate();
-  const payoutData = samplePayoutData;
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   const handleBackToHome = () => {
     navigate('/dashboard');
   };
 
-  // Calculate income statement data
-  const currentMonthRevenue = payoutData.totalAmount;
-  const previousMonthsRevenue = payoutData.payoutHistory.reduce((sum, p) => sum + p.amount, 0);
-  const totalRevenue = currentMonthRevenue + previousMonthsRevenue;
+  const handleViewDetails = (statementId: string) => {
+    navigate(`/income-statement/${statementId}`);
+  };
 
-  // Income Statement Items
-  const incomeItems = [
-    {
-      category: 'Revenue',
-      items: [
-        { description: 'Product Sales', amount: totalRevenue * 0.85, period: 'Feb 2026' },
-        { description: 'Shipping Income', amount: totalRevenue * 0.10, period: 'Feb 2026' },
-        { description: 'Other Income', amount: totalRevenue * 0.05, period: 'Feb 2026' },
-      ],
-      total: totalRevenue,
-      isRevenue: true
-    },
-    {
-      category: 'Cost of Goods Sold',
-      items: [
-        { description: 'Product Costs', amount: totalRevenue * 0.45, period: 'Feb 2026' },
-        { description: 'Shipping Costs', amount: totalRevenue * 0.08, period: 'Feb 2026' },
-        { description: 'Packaging', amount: totalRevenue * 0.02, period: 'Feb 2026' },
-      ],
-      total: totalRevenue * 0.55,
-      isRevenue: false
-    },
-    {
-      category: 'Operating Expenses',
-      items: [
-        { description: 'Platform Fees', amount: totalRevenue * 0.12, period: 'Feb 2026' },
-        { description: 'Marketing', amount: totalRevenue * 0.05, period: 'Feb 2026' },
-        { description: 'Customer Support', amount: totalRevenue * 0.03, period: 'Feb 2026' },
-      ],
-      total: totalRevenue * 0.20,
-      isRevenue: false
-    }
-  ];
-
-  const grossProfit = totalRevenue - (totalRevenue * 0.55);
-  const operatingIncome = grossProfit - (totalRevenue * 0.20);
-  const netIncome = operatingIncome;
+  const filteredStatements = incomeStatements.filter(statement => {
+    const matchesSearch = statement.id.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || statement.status.toLowerCase().replace(' ', '-') === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header sellerId={payoutData.sellerId} />
+      <Header sellerId="SEL-789" />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Back Button */}
-        <button
-          onClick={handleBackToHome}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span className="font-medium">Back to Dashboard</span>
-        </button>
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-2 text-sm text-gray-600 mb-6">
+          <button onClick={handleBackToHome} className="hover:text-gray-900">
+            Home
+          </button>
+          <span>/</span>
+          <span className="text-gray-900 font-medium">My Income</span>
+        </div>
 
-        {/* Page Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Income Statement</h1>
-            <div className="flex items-center gap-2 text-gray-600">
-              <Calendar className="w-4 h-4" />
-              <span className="text-sm">Period: February 2026</span>
+        {/* Page Title */}
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">My Income</h1>
+
+        {/* Tabs */}
+        <div className="border-b border-gray-200 mb-6">
+          <nav className="flex gap-8">
+            <button className="pb-4 text-sm font-medium text-gray-500 hover:text-gray-900">
+              Income Overview
+            </button>
+            <button className="pb-4 text-sm font-medium text-red-600 border-b-2 border-red-600">
+              Income Statement
+            </button>
+            <button className="pb-4 text-sm font-medium text-gray-500 hover:text-gray-900">
+              Income Details
+            </button>
+          </nav>
+        </div>
+
+        {/* Info Banner */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-start gap-3">
+          <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+          <p className="text-sm text-blue-900">
+            Dear Seller, please note that there may be a system delay affecting the automated updates of your seller statement.
+            If you notice that your statement is not up to date, kindly reach out to our Partner Support Team for assistance.{' '}
+            <a href="#" className="text-blue-600 hover:underline font-medium">Contact PSC</a>
+          </p>
+        </div>
+
+        {/* View Statements Section */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+          <div className="px-6 py-5 border-b border-gray-100">
+            <div className="flex items-center gap-2 mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">View Statements</h2>
+              <Info className="w-4 h-4 text-gray-400" />
+            </div>
+
+            {/* Filters */}
+            <div className="flex gap-4">
+              <div className="flex-1 max-w-xs">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Release Status
+                </label>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">Please Select</option>
+                  <option value="ready-to-release">Ready to Release</option>
+                  <option value="released">Released</option>
+                </select>
+              </div>
+
+              <div className="flex-1 max-w-xs">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Statement Number
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full px-3 py-2 pr-10 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                </div>
+              </div>
+
+              <div className="flex items-end">
+                <button
+                  onClick={() => {
+                    setSearchTerm('');
+                    setStatusFilter('all');
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+                >
+                  Reset
+                </button>
+              </div>
             </div>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-            <Download className="w-4 h-4" />
-            <span className="text-sm font-medium">Export PDF</span>
-          </button>
-        </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <p className="text-sm text-gray-500 mb-2">Total Revenue</p>
-            <p className="text-2xl font-bold text-gray-900 mb-1">
-              ${totalRevenue.toFixed(2)}
-            </p>
-            <p className="text-xs text-emerald-600 font-medium">+12.5% from last month</p>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <p className="text-sm text-gray-500 mb-2">Gross Profit</p>
-            <p className="text-2xl font-bold text-gray-900 mb-1">
-              ${grossProfit.toFixed(2)}
-            </p>
-            <p className="text-xs text-gray-600">{((grossProfit / totalRevenue) * 100).toFixed(1)}% margin</p>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <p className="text-sm text-gray-500 mb-2">Operating Income</p>
-            <p className="text-2xl font-bold text-gray-900 mb-1">
-              ${operatingIncome.toFixed(2)}
-            </p>
-            <p className="text-xs text-gray-600">{((operatingIncome / totalRevenue) * 100).toFixed(1)}% margin</p>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <p className="text-sm text-gray-500 mb-2">Net Income</p>
-            <p className="text-2xl font-bold text-emerald-600 mb-1">
-              ${netIncome.toFixed(2)}
-            </p>
-            <p className="text-xs text-emerald-600 font-medium">+8.3% from last month</p>
-          </div>
-        </div>
-
-        {/* Detailed Income Statement */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="px-6 py-5 border-b border-gray-100">
-            <h2 className="text-xl font-semibold text-gray-900">Detailed Statement</h2>
-          </div>
-
-          <div className="p-6">
+          {/* Table */}
+          <div className="overflow-x-auto">
             <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Description</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Period</th>
-                  <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Amount</th>
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Statement Number
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Statement Period
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Released Amount
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Release Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Action
+                  </th>
                 </tr>
               </thead>
-              <tbody>
-                {incomeItems.map((section, sectionIdx) => (
-                  <React.Fragment key={sectionIdx}>
-                    {/* Category Header */}
-                    <tr className="bg-gray-50">
-                      <td colSpan={3} className="py-3 px-4">
-                        <span className="text-sm font-bold text-gray-900">{section.category}</span>
-                      </td>
-                    </tr>
-
-                    {/* Category Items */}
-                    {section.items.map((item, itemIdx) => (
-                      <tr key={itemIdx} className="border-b border-gray-100">
-                        <td className="py-3 px-4 pl-8 text-sm text-gray-700">{item.description}</td>
-                        <td className="py-3 px-4 text-sm text-gray-500">{item.period}</td>
-                        <td className="py-3 px-4 text-sm text-gray-900 text-right font-medium">
-                          ${item.amount.toFixed(2)}
-                        </td>
-                      </tr>
-                    ))}
-
-                    {/* Category Total */}
-                    <tr className="border-b-2 border-gray-200">
-                      <td className="py-3 px-4 text-sm font-semibold text-gray-900">
-                        Total {section.category}
-                      </td>
-                      <td className="py-3 px-4"></td>
-                      <td className="py-3 px-4 text-sm font-bold text-gray-900 text-right">
-                        ${section.total.toFixed(2)}
-                      </td>
-                    </tr>
-                  </React.Fragment>
+              <tbody className="bg-white divide-y divide-gray-100">
+                {filteredStatements.map((statement) => (
+                  <tr key={statement.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      {statement.id}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {statement.period}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                      PKR {statement.releasedAmount.toFixed(2)}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-md text-xs font-medium ${
+                        statement.status === 'Released'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : 'bg-amber-50 text-amber-700 border border-amber-200'
+                      }`}>
+                        {statement.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col gap-1">
+                        <button
+                          onClick={() => handleViewDetails(statement.id)}
+                          className="text-sm text-blue-600 hover:text-blue-700 font-medium text-left"
+                        >
+                          View Statement Details
+                        </button>
+                        <button className="text-sm text-blue-600 hover:text-blue-700 font-medium text-left">
+                          Print Invoice
+                        </button>
+                        <button className="text-sm text-blue-600 hover:text-blue-700 font-medium text-left">
+                          Download ▼
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
                 ))}
-
-                {/* Gross Profit */}
-                <tr className="bg-blue-50 border-b-2 border-blue-200">
-                  <td className="py-4 px-4 text-base font-bold text-blue-900">Gross Profit</td>
-                  <td className="py-4 px-4"></td>
-                  <td className="py-4 px-4 text-base font-bold text-blue-900 text-right">
-                    ${grossProfit.toFixed(2)}
-                  </td>
-                </tr>
-
-                {/* Operating Income */}
-                <tr className="bg-emerald-50 border-b-2 border-emerald-200">
-                  <td className="py-4 px-4 text-base font-bold text-emerald-900">Operating Income</td>
-                  <td className="py-4 px-4"></td>
-                  <td className="py-4 px-4 text-base font-bold text-emerald-900 text-right">
-                    ${operatingIncome.toFixed(2)}
-                  </td>
-                </tr>
-
-                {/* Net Income */}
-                <tr className="bg-emerald-100">
-                  <td className="py-4 px-4 text-lg font-bold text-emerald-900">Net Income</td>
-                  <td className="py-4 px-4"></td>
-                  <td className="py-4 px-4 text-lg font-bold text-emerald-900 text-right">
-                    ${netIncome.toFixed(2)}
-                  </td>
-                </tr>
               </tbody>
             </table>
           </div>
-        </div>
 
-        {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">Profitability Ratios</h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Gross Margin</span>
-                <span className="text-sm font-semibold text-gray-900">
-                  {((grossProfit / totalRevenue) * 100).toFixed(1)}%
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Operating Margin</span>
-                <span className="text-sm font-semibold text-gray-900">
-                  {((operatingIncome / totalRevenue) * 100).toFixed(1)}%
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Net Margin</span>
-                <span className="text-sm font-semibold text-emerald-600">
-                  {((netIncome / totalRevenue) * 100).toFixed(1)}%
-                </span>
-              </div>
+          {/* Pagination */}
+          <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-700">Items per page:</span>
+              <select className="px-2 py-1 border border-gray-200 rounded text-sm">
+                <option>10</option>
+                <option>20</option>
+                <option>50</option>
+              </select>
             </div>
-          </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">Cost Structure</h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">COGS</span>
-                <span className="text-sm font-semibold text-gray-900">
-                  {((totalRevenue * 0.55 / totalRevenue) * 100).toFixed(1)}%
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Operating Expenses</span>
-                <span className="text-sm font-semibold text-gray-900">
-                  {((totalRevenue * 0.20 / totalRevenue) * 100).toFixed(1)}%
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Total Costs</span>
-                <span className="text-sm font-semibold text-gray-900">
-                  {(((totalRevenue * 0.55 + totalRevenue * 0.20) / totalRevenue) * 100).toFixed(1)}%
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">Month Overview</h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Total Orders</span>
-                <span className="text-sm font-semibold text-gray-900">
-                  {payoutData.orders.length + payoutData.payoutHistory.reduce((sum, p) => sum + p.orderCount, 0)}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Avg Order Value</span>
-                <span className="text-sm font-semibold text-gray-900">
-                  ${(totalRevenue / (payoutData.orders.length + payoutData.payoutHistory.reduce((sum, p) => sum + p.orderCount, 0))).toFixed(2)}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Growth Rate</span>
-                <span className="text-sm font-semibold text-emerald-600">+12.5%</span>
-              </div>
+            <div className="flex items-center gap-2">
+              <button className="px-3 py-1 text-sm text-gray-400 cursor-not-allowed">
+                &lt; Previous
+              </button>
+              <button className="px-3 py-1 text-sm bg-red-600 text-white rounded">
+                1
+              </button>
+              <button className="px-3 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded">
+                2
+              </button>
+              <button className="px-3 py-1 text-sm text-blue-600 hover:bg-gray-100 rounded">
+                Next &gt;
+              </button>
             </div>
           </div>
         </div>

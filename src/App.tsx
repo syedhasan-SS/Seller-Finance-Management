@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 const Dashboard = lazy(() => import('@components/Dashboard'));
 const Orders = lazy(() => import('@components/Orders'));
 const IncomeStatement = lazy(() => import('@components/IncomeStatement'));
+const StatementDetail = lazy(() => import('@components/StatementDetail'));
 
 const LoadingFallback = () => (
   <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -22,6 +23,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/orders" element={<Orders />} />
           <Route path="/income-statement" element={<IncomeStatement />} />
+          <Route path="/income-statement/:statementId" element={<StatementDetail />} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </Suspense>
