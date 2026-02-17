@@ -75,18 +75,26 @@ export async function getVendorId(vendorHandle: string): Promise<string | null> 
  */
 export async function getSellerPayoutData(vendorId: string): Promise<PayoutData> {
   // Get upcoming payout summary
+  // Note: In the real system, orders in 'in_progress' status are part of the current payout cycle
+  // We look for the most recent payout with 'in_progress' status to get upcoming payout info
   const summarySQL = `
     SELECT
-      COUNT(*) AS eligible_order_count,
-      SUM(CASE WHEN status = 'eligible' THEN total_payable_smallest_unit ELSE 0 END) / 100.0 AS eligible_amount_gbp,
-      SUM(CASE WHEN status = 'pending_eligibility' THEN total_payable_smallest_unit ELSE 0 END) / 100.0 AS pending_amount_gbp,
-      MIN(CASE WHEN status = 'pending_eligibility' THEN created_at END) AS earliest_pending_date,
-      MAX(created_at) AS latest_order_date
-    FROM \`${PROJECT_ID}.aurora_postgres_public.balance_transaction\`
-    WHERE CAST(destination_id AS INT64) = ${vendorId}
-      AND _fivetran_deleted = FALSE
-      AND status IN ('eligible', 'pending_eligibility')
-      AND payout_id IS NULL
+      COUNT(DISTINCT bt.order_line_id) AS eligible_order_count,
+      SUM(bt.total_payable_smallest_unit) / 100.0 AS eligible_amount_gbp,
+      0 AS pending_amount_gbp,
+      MIN(bt.created_at) AS earliest_pending_date,
+      MAX(bt.created_at) AS latest_order_date,
+      p.id as payout_id,
+      p.created_at as payout_created_at
+    FROM \`${PROJECT_ID}.aurora_postgres_public.balance_transaction\` bt
+    LEFT JOIN \`${PROJECT_ID}.aurora_postgres_public.payout\` p
+      ON bt.payout_id = p.id AND p._fivetran_deleted = FALSE
+    WHERE CAST(bt.destination_id AS INT64) = ${vendorId}
+      AND bt._fivetran_deleted = FALSE
+      AND bt.status = 'in_progress'
+    GROUP BY p.id, p.created_at
+    ORDER BY p.created_at DESC
+    LIMIT 1
   `;
 
   const summaryResults = await executeQuery<{
@@ -95,6 +103,8 @@ export async function getSellerPayoutData(vendorId: string): Promise<PayoutData>
     pending_amount_gbp: number;
     earliest_pending_date: string | null;
     latest_order_date: string | null;
+    payout_id: number | null;
+    payout_created_at: string | null;
   }>(summarySQL);
 
   const summary = summaryResults[0] || {
@@ -103,6 +113,8 @@ export async function getSellerPayoutData(vendorId: string): Promise<PayoutData>
     pending_amount_gbp: 0,
     earliest_pending_date: null,
     latest_order_date: null,
+    payout_id: null,
+    payout_created_at: null,
   };
 
   // Calculate next payout date (next Monday)
@@ -161,7 +173,7 @@ export async function getSellerOrders(
   let whereClause = `
     WHERE CAST(bt.destination_id AS INT64) = ${vendorId}
       AND bt._fivetran_deleted = FALSE
-      AND bt.status NOT IN ('failed', 'cancelled')
+      AND bt.status IN ('in_progress', 'completed', 'eligible', 'pending_eligibility', 'held', 'paid')
   `;
 
   if (status && status !== 'all') {
@@ -330,9 +342,10 @@ export async function getPayoutHistory(
       COUNT(DISTINCT bt.order_line_id) AS order_count
     FROM \`${PROJECT_ID}.aurora_postgres_public.payout\` p
     LEFT JOIN \`${PROJECT_ID}.aurora_postgres_public.balance_transaction\` bt
-      ON bt.payout_id = p.id
+      ON bt.payout_id = p.id AND bt._fivetran_deleted = FALSE
     WHERE CAST(p.destination_id AS INT64) = ${vendorId}
       AND p._fivetran_deleted = FALSE
+      AND p.status = 'completed'
     GROUP BY p.id, p.created_at, p.amount_smallest_unit, p.status
     ORDER BY p.created_at DESC
     LIMIT ${limit}
@@ -443,21 +456,24 @@ export async function getStatementDetail(payoutId: number, vendorId: string): Pr
  * Get active blockers for seller
  */
 async function getActiveBlockers(vendorId: string): Promise<ActiveBlocker[]> {
-  // Query orders with hold status
+  // Query orders with hold status or in progress
+  // In_progress orders may have QC or FF issues that need attention
   const sql = `
     SELECT
       CAST(bt.order_line_id AS STRING) AS order_id,
       bt.status,
       vp.qc_status,
       vp.ff_status,
+      vp.latest_status,
       bt.created_at
     FROM \`${PROJECT_ID}.aurora_postgres_public.balance_transaction\` bt
     LEFT JOIN \`${PROJECT_ID}.fleek_analytics.vendor_payout\` vp
       ON bt.order_line_id = CAST(vp.order_line_id AS STRING)
     WHERE CAST(bt.destination_id AS INT64) = ${vendorId}
       AND bt._fivetran_deleted = FALSE
-      AND bt.status IN ('held', 'pending_eligibility')
-      AND bt.payout_id IS NULL
+      AND bt.status IN ('held', 'pending_eligibility', 'in_progress')
+      AND vp.latest_status NOT IN ('FREIGHT_DEPARTED', 'DELIVERED')
+    LIMIT 50
   `;
 
   const results = await executeQuery<{
@@ -465,6 +481,7 @@ async function getActiveBlockers(vendorId: string): Promise<ActiveBlocker[]> {
     status: string;
     qc_status: string;
     ff_status: string;
+    latest_status: string;
     created_at: string;
   }>(sql);
 
