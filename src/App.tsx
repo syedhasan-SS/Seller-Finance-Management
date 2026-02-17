@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { SellerProvider } from './contexts/SellerContext';
 
 const Dashboard = lazy(() => import('@components/Dashboard'));
 const Orders = lazy(() => import('@components/Orders'));
@@ -17,17 +18,19 @@ const LoadingFallback = () => (
 
 function App() {
   return (
-    <BrowserRouter>
-      <Suspense fallback={<LoadingFallback />}>
-        <Routes>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/orders" element={<Orders />} />
-          <Route path="/income-statement" element={<IncomeStatement />} />
-          <Route path="/income-statement/:statementId" element={<StatementDetail />} />
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
-      </Suspense>
-    </BrowserRouter>
+    <SellerProvider>
+      <BrowserRouter>
+        <Suspense fallback={<LoadingFallback />}>
+          <Routes>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/income-statement" element={<IncomeStatement />} />
+            <Route path="/income-statement/:statementId" element={<StatementDetail />} />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
+        </Suspense>
+      </BrowserRouter>
+    </SellerProvider>
   );
 }
 
