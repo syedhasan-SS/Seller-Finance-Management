@@ -42,10 +42,10 @@ export function SellerProvider({ children }: SellerProviderProps) {
         return;
       }
 
-      // Option 2: Get from environment (fallback for development)
-      const defaultVendor = import.meta.env.VITE_DEFAULT_VENDOR;
+      // Option 2: Get from environment or use hardcoded fallback (for development)
+      const defaultVendor = import.meta.env.VITE_DEFAULT_VENDOR || 'vibe-vintage';
       if (defaultVendor) {
-        console.log('[SellerContext] Using default vendor from env:', defaultVendor);
+        console.log('[SellerContext] Using default vendor:', defaultVendor);
         setVendorHandle(defaultVendor);
         setSellerId(defaultVendor);
         return;
