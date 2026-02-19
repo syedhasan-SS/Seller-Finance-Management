@@ -1,24 +1,14 @@
 /**
- * BigQuery Client Wrapper for Vercel Serverless Functions
+ * BigQuery Client Wrapper using MCP Tools (Pilot Test)
  *
- * This module initializes the BigQuery client and provides helper functions
- * to execute queries safely in the serverless environment.
+ * Uses mcp__bigquery__execute_sql which is available in Claude Code environment.
+ * This allows us to test with real data before implementing production auth.
  */
-
-import { BigQuery } from '@google-cloud/bigquery';
 
 const PROJECT_ID = 'dogwood-baton-345622';
 
-// Initialize BigQuery client with credentials from environment
-export const bigquery = new BigQuery({
-  projectId: PROJECT_ID,
-  credentials: process.env.BIGQUERY_CREDENTIALS
-    ? JSON.parse(process.env.BIGQUERY_CREDENTIALS)
-    : undefined,
-});
-
 /**
- * Execute a BigQuery SQL query
+ * Execute a BigQuery SQL query using MCP tools
  * @param sql - The SQL query to execute
  * @returns Array of result rows
  */
@@ -26,10 +16,28 @@ export async function executeQuery<T = any>(sql: string): Promise<T[]> {
   try {
     console.log('[BigQuery API] Executing query:', sql.substring(0, 200) + '...');
 
-    const [rows] = await bigquery.query({ query: sql });
+    // Check if MCP tool is available
+    if (typeof globalThis === 'undefined' || !(globalThis as any).mcp__bigquery__execute_sql) {
+      throw new Error('MCP BigQuery tool not available. Running in Claude Code environment?');
+    }
 
-    console.log(`[BigQuery API] Query returned ${rows.length} rows`);
-    return rows as T[];
+    // Call the MCP BigQuery tool
+    const result = await (globalThis as any).mcp__bigquery__execute_sql({
+      sql: sql,
+      dry_run: false
+    });
+
+    // Parse newline-delimited JSON response
+    if (!result || typeof result !== 'string') {
+      console.warn('[BigQuery API] Query returned empty or invalid result');
+      return [];
+    }
+
+    const lines = result.split('\n').filter((line: string) => line.trim());
+    const parsedResults: T[] = lines.map((line: string) => JSON.parse(line));
+
+    console.log(`[BigQuery API] Query returned ${parsedResults.length} rows`);
+    return parsedResults;
   } catch (error: any) {
     console.error('[BigQuery API] Query failed:', error);
     throw new Error(`BigQuery query failed: ${error.message || error}`);
