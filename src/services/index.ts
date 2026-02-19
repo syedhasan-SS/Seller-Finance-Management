@@ -11,6 +11,7 @@
 import type { PayoutData, Order, OrderDetailView } from '../types';
 import { samplePayoutData } from '../data/sampleData';
 import * as bigqueryService from './bigquery';
+import * as apiClient from './api-client';
 
 // Configuration
 const USE_BIGQUERY = import.meta.env.VITE_USE_BIGQUERY === 'true';
@@ -25,22 +26,22 @@ export async function getPayoutData(sellerIdOrHandle: string): Promise<PayoutDat
     return samplePayoutData;
   }
 
-  // Use BigQuery for production
-  console.log('[API] Using BigQuery data for seller:', sellerIdOrHandle);
+  // Use API client to call backend API (which uses BigQuery)
+  console.log('[API] Using BigQuery API for seller:', sellerIdOrHandle);
 
   // Check if we have a vendor handle or vendor ID
   let vendorId = sellerIdOrHandle;
 
   // If it looks like a handle (contains letters), look up the ID
   if (/[a-z]/i.test(sellerIdOrHandle)) {
-    const id = await bigqueryService.getVendorId(sellerIdOrHandle);
+    const id = await apiClient.getVendorId(sellerIdOrHandle);
     if (!id) {
       throw new Error(`Vendor not found: ${sellerIdOrHandle}`);
     }
     vendorId = id;
   }
 
-  return bigqueryService.getSellerPayoutData(vendorId);
+  return apiClient.getSellerPayoutData(vendorId);
 }
 
 /**
@@ -75,12 +76,12 @@ export async function getOrders(
 
   let vendorId = sellerIdOrHandle;
   if (/[a-z]/i.test(sellerIdOrHandle)) {
-    const id = await bigqueryService.getVendorId(sellerIdOrHandle);
+    const id = await apiClient.getVendorId(sellerIdOrHandle);
     if (!id) throw new Error(`Vendor not found: ${sellerIdOrHandle}`);
     vendorId = id;
   }
 
-  return bigqueryService.getSellerOrders(vendorId, filters);
+  return apiClient.getSellerOrders(vendorId, filters);
 }
 
 /**
