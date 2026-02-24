@@ -11,17 +11,46 @@ import type { Order, PayoutData } from '../types';
 const API_URL = import.meta.env.VITE_API_URL || '';
 
 /**
- * Get vendor ID from handle
+ * Get auth headers with JWT token
  */
-export async function getVendorId(handle: string): Promise<string> {
-  const response = await fetch(`${API_URL}/api/vendors/${handle}`);
+function getAuthHeaders(): HeadersInit {
+  const token = localStorage.getItem('auth_token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
+/**
+ * Handle API response with automatic 401 redirect
+ */
+async function handleResponse(response: Response) {
+  if (response.status === 401) {
+    // Token expired or invalid - redirect to login
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('supplier_handle');
+    localStorage.removeItem('supplier_email');
+    window.location.href = '/login';
+    throw new Error('Session expired. Please login again.');
+  }
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error || `Failed to get vendor: ${handle}`);
+    throw new Error(error.error || 'API request failed');
   }
 
-  const data = await response.json();
+  return response.json();
+}
+
+/**
+ * Get vendor ID from handle
+ */
+export async function getVendorId(handle: string): Promise<string> {
+  const response = await fetch(`${API_URL}/api/vendors/${handle}`, {
+    headers: getAuthHeaders(),
+  });
+
+  const data = await handleResponse(response);
   return data.id;
 }
 
@@ -47,28 +76,22 @@ export async function getSellerOrders(
   const queryString = params.toString();
   const url = `${API_URL}/api/sellers/${vendorId}/orders${queryString ? `?${queryString}` : ''}`;
 
-  const response = await fetch(url);
+  const response = await fetch(url, {
+    headers: getAuthHeaders(),
+  });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to get orders');
-  }
-
-  return response.json();
+  return handleResponse(response);
 }
 
 /**
  * Get complete payout data for Dashboard
  */
 export async function getSellerPayoutData(vendorId: string): Promise<PayoutData> {
-  const response = await fetch(`${API_URL}/api/sellers/${vendorId}/payout`);
+  const response = await fetch(`${API_URL}/api/sellers/${vendorId}/payout`, {
+    headers: getAuthHeaders(),
+  });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to get payout data');
-  }
-
-  const data = await response.json();
+  const data = await handleResponse(response);
 
   // Get recent orders for the dashboard
   const orders = await getSellerOrders(vendorId, { limit: 10 });

@@ -11,9 +11,7 @@ export default function Header({ sellerId }: HeaderProps) {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <svg className="w-6 h-6 text-amber-500" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-              </svg>
+              <img src="/logo.jpeg" alt="Fleek" className="h-8 w-8 object-contain rounded-sm" />
               <span className="text-lg font-bold text-gray-900">FLEEK</span>
             </div>
           </div>

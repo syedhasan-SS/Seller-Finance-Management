@@ -1,7 +1,10 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
 import { SellerProvider } from './contexts/SellerContext';
+import ProtectedRoute from './components/ProtectedRoute';
 
+const Login = lazy(() => import('@/pages/Login'));
 const Dashboard = lazy(() => import('@components/Dashboard'));
 const Orders = lazy(() => import('@components/Orders'));
 const IncomeStatement = lazy(() => import('@components/IncomeStatement'));
@@ -18,19 +21,50 @@ const LoadingFallback = () => (
 
 function App() {
   return (
-    <SellerProvider>
-      <BrowserRouter>
-        <Suspense fallback={<LoadingFallback />}>
-          <Routes>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/orders" element={<Orders />} />
-            <Route path="/income-statement" element={<IncomeStatement />} />
-            <Route path="/income-statement/:statementId" element={<StatementDetail />} />
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
-    </SellerProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <SellerProvider>
+          <Suspense fallback={<LoadingFallback />}>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/orders"
+                element={
+                  <ProtectedRoute>
+                    <Orders />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/income-statement"
+                element={
+                  <ProtectedRoute>
+                    <IncomeStatement />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/income-statement/:statementId"
+                element={
+                  <ProtectedRoute>
+                    <StatementDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            </Routes>
+          </Suspense>
+        </SellerProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 

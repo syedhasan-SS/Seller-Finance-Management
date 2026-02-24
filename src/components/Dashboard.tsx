@@ -9,7 +9,6 @@ import Header from './Header';
 import PayoutTimeline from './PayoutTimeline';
 import OrdersTable from './OrdersTable';
 import ActiveBlockers from './ActiveBlockers';
-import TrustScoreWidget from './TrustScoreWidget';
 import PayoutHistory from './PayoutHistory';
 import OrderDetail from './OrderDetail';
 import { LoadingSpinner } from './LoadingSpinner';
@@ -199,7 +198,6 @@ export const Dashboard: React.FC = () => {
             </div>
             <div className="space-y-6">
               <ActiveBlockers blockers={payoutData.activeBlockers} />
-              <TrustScoreWidget trustScore={payoutData.trustScore} />
             </div>
           </div>
 

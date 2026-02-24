@@ -1,112 +1,78 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@services/supabase';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface AuthContextType {
-  user: User | null;
-  session: Session | null;
+  token: string | null;
+  supplierId: string | null;
+  supplierHandle: string | null;
+  supplierEmail: string | null;
+  isAuthenticated: boolean;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signInWithMagicLink: (email: string) => Promise<void>;
-  signOut: () => Promise<void>;
-  signUp: (email: string, password: string, sellerId: string) => Promise<void>;
+  login: (token: string, handle: string, email: string) => void;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [token, setToken] = useState<string | null>(null);
+  const [supplierHandle, setSupplierHandle] = useState<string | null>(null);
+  const [supplierEmail, setSupplierEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
+  // Load token from localStorage on mount
   useEffect(() => {
-    // Check active session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    const storedToken = localStorage.getItem('auth_token');
+    const storedHandle = localStorage.getItem('supplier_handle');
+    const storedEmail = localStorage.getItem('supplier_email');
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    if (storedToken) {
+      setToken(storedToken);
+      setSupplierHandle(storedHandle);
+      setSupplierEmail(storedEmail);
+    }
 
-    return () => subscription.unsubscribe();
+    setLoading(false);
   }, []);
 
-  const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) throw error;
+  const login = (newToken: string, handle: string, email: string) => {
+    setToken(newToken);
+    setSupplierHandle(handle);
+    setSupplierEmail(email);
+    localStorage.setItem('auth_token', newToken);
+    localStorage.setItem('supplier_handle', handle);
+    localStorage.setItem('supplier_email', email);
   };
 
-  const signInWithMagicLink = async (email: string) => {
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
-      },
-    });
-    if (error) throw error;
+  const logout = () => {
+    setToken(null);
+    setSupplierHandle(null);
+    setSupplierEmail(null);
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('supplier_handle');
+    localStorage.removeItem('supplier_email');
+    navigate('/login');
   };
 
-  const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+  const value: AuthContextType = {
+    token,
+    supplierId: supplierHandle, // Using handle as ID for now
+    supplierHandle,
+    supplierEmail,
+    isAuthenticated: !!token,
+    loading,
+    login,
+    logout,
   };
 
-  const signUp = async (email: string, password: string, sellerId: string) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          seller_id: sellerId,
-        },
-      },
-    });
-    if (error) throw error;
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
 
-    // Create seller record
-    if (data.user) {
-      const { error: insertError } = await supabase
-        .from('sellers')
-        .insert({
-          seller_id: sellerId,
-          email: email,
-        });
-      if (insertError) throw insertError;
-    }
-  };
-
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        session,
-        loading,
-        signIn,
-        signInWithMagicLink,
-        signOut,
-        signUp,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
-};
-
-export const useAuth = () => {
+export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-};
+}
