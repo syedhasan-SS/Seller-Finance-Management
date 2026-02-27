@@ -38,7 +38,7 @@ export async function executeQuery<T = any>(sql: string): Promise<T[]> {
     console.log('[BigQuery] Executing query:', sql.substring(0, 200) + '...');
 
     const bigquery = createClient();
-    const [rows] = await bigquery.query({ query: sql, location: 'US' });
+    const [rows] = await bigquery.query({ query: sql });
 
     console.log(`[BigQuery] Query returned ${rows.length} rows`);
     return rows as T[];
