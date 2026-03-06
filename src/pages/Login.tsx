@@ -2,16 +2,21 @@ import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
+interface LoginUser {
+  id: string;
+  name: string;
+  email: string;
+  handle: string;
+  role: 'owner' | 'admin' | 'viewer' | 'vendor';
+}
+
 interface LoginResponse {
   token: string;
-  supplier: {
-    id: string;
-    handle: string;
-  };
+  user: LoginUser;
 }
 
 export default function Login() {
-  const [handle, setHandle] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +32,7 @@ export default function Login() {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ handle, password }),
+        body: JSON.stringify({ identifier, password }),
       });
 
       if (!response.ok) {
@@ -36,11 +41,11 @@ export default function Login() {
       }
 
       const data: LoginResponse = await response.json();
+      const { user, token } = data;
 
-      // Update AuthContext state (also sets localStorage internally)
-      login(data.token, data.supplier.handle, '');
+      // Update AuthContext — use email for admins, handle for vendors
+      login(token, user.handle || user.email, user.email, user.role, user.name);
 
-      // Redirect to dashboard
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Failed to login. Please try again.');
@@ -70,7 +75,7 @@ export default function Login() {
           </div>
 
           <h2 className="text-2xl font-bold text-fleek-black mb-1">Welcome back</h2>
-          <p className="text-sm text-gray-500 mb-8">Enter your vendor handle to access the portal.</p>
+          <p className="text-sm text-gray-500 mb-8">Sign in with your email or vendor handle.</p>
 
           <form className="space-y-5" onSubmit={handleSubmit}>
             {error && (
@@ -80,19 +85,19 @@ export default function Login() {
             )}
 
             <div>
-              <label htmlFor="handle" className="block text-sm font-semibold text-fleek-black mb-1.5">
-                Vendor Handle
+              <label htmlFor="identifier" className="block text-sm font-semibold text-fleek-black mb-1.5">
+                Email or Vendor Handle
               </label>
               <input
-                id="handle"
-                name="handle"
+                id="identifier"
+                name="identifier"
                 type="text"
                 autoComplete="username"
                 required
-                value={handle}
-                onChange={(e) => setHandle(e.target.value)}
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
                 className="appearance-none block w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-sm placeholder-gray-400 focus:outline-none focus:border-fleek-yellow transition font-medium"
-                placeholder="your-vendor-handle"
+                placeholder="you@joinfleek.com or vendor-handle"
               />
             </div>
 
@@ -121,10 +126,6 @@ export default function Login() {
               {loading ? 'Signing in…' : 'Sign in'}
             </button>
           </form>
-
-          <p className="mt-8 text-xs text-gray-400 text-center">
-            Pilot mode — enter your vendor handle and any password to access.
-          </p>
         </div>
       </div>
     </div>

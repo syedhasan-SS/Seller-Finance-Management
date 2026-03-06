@@ -11,27 +11,35 @@ import bcrypt from 'bcryptjs';
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production-use-long-random-string';
 const JWT_EXPIRES_IN = '7d'; // Token valid for 7 days
 
+export type UserRole = 'owner' | 'admin' | 'viewer' | 'vendor';
+
 export interface JWTPayload {
   supplier_id: string;
   supplier_email: string;
   vendor_handle: string;
+  role: UserRole;
+  name?: string;
   iat?: number;
   exp?: number;
 }
 
 /**
- * Generate JWT token for authenticated supplier
+ * Generate JWT token for authenticated user
  */
 export function generateToken(
   supplier_id: string,
   supplier_email: string,
-  vendor_handle: string
+  vendor_handle: string,
+  role: UserRole = 'vendor',
+  name?: string
 ): string {
   return jwt.sign(
     {
       supplier_id,
       supplier_email,
       vendor_handle,
+      role,
+      name,
     },
     JWT_SECRET,
     { expiresIn: JWT_EXPIRES_IN }
@@ -54,7 +62,7 @@ export function verifyToken(token: string): JWTPayload {
  * Hash password with bcrypt
  */
 export async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, 10);
+  return bcrypt.hash(password, 12);
 }
 
 /**
