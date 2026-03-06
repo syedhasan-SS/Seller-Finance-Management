@@ -5,13 +5,12 @@ interface LoginResponse {
   token: string;
   supplier: {
     id: string;
-    email: string;
     handle: string;
   };
 }
 
 export default function Login() {
-  const [email, setEmail] = useState('');
+  const [handle, setHandle] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +27,7 @@ export default function Login() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ handle, password }),
       });
 
       if (!response.ok) {
@@ -41,7 +40,6 @@ export default function Login() {
       // Store token in localStorage
       localStorage.setItem('auth_token', data.token);
       localStorage.setItem('supplier_handle', data.supplier.handle);
-      localStorage.setItem('supplier_email', data.supplier.email);
 
       // Redirect to dashboard
       navigate('/dashboard');
@@ -76,20 +74,20 @@ export default function Login() {
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
+              <label htmlFor="handle" className="block text-sm font-medium text-gray-700">
+                Vendor Handle
               </label>
               <div className="mt-1">
                 <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
+                  id="handle"
+                  name="handle"
+                  type="text"
+                  autoComplete="username"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={handle}
+                  onChange={(e) => setHandle(e.target.value)}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="your-email@example.com"
+                  placeholder="your-vendor-handle"
                 />
               </div>
             </div>
@@ -138,8 +136,7 @@ export default function Login() {
 
             <div className="mt-6">
               <p className="text-xs text-gray-500 text-center">
-                For pilot testing, use any email from: creed-vintage, retro-vintage-global,
-                italian-dream, thrift-kings, vintage-silver, world-vintage-wholesale, very-indian-people
+                For pilot testing, enter your vendor handle (e.g. <strong>captain-vintage</strong>) and any password.
               </p>
             </div>
           </div>
