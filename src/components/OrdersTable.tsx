@@ -54,8 +54,8 @@ export default function OrdersTable({ orders, onOrderClick }: OrdersTableProps) 
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-      <div className="px-6 py-5">
-        <h2 className="text-xl font-semibold text-gray-900 mb-1">Orders Breakdown</h2>
+      <div className="px-6 py-5 border-b border-gray-100">
+        <h2 className="text-xl font-bold text-fleek-black mb-0.5">Orders Breakdown</h2>
         <p className="text-sm text-gray-500">
           {orders.length} {orders.length === 1 ? 'order' : 'orders'} in upcoming payout
         </p>
@@ -63,27 +63,27 @@ export default function OrdersTable({ orders, onOrderClick }: OrdersTableProps) 
 
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-white border-y border-gray-100">
+          <thead className="bg-gray-50 border-b border-gray-100">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
                 Order ID
               </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
                 Product
               </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
                 Date
               </th>
-              <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
                 Base Price
               </th>
-              <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
                 Commission
               </th>
-              <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
                 Total Payout
               </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
                 Status
               </th>
             </tr>
@@ -95,56 +95,56 @@ export default function OrdersTable({ orders, onOrderClick }: OrdersTableProps) 
 
               return (
                 <tr
-                    key={order.orderId}
-                    className="hover:bg-gray-50 transition-colors cursor-pointer"
-                    onClick={() => onOrderClick?.(order.orderId)}
-                  >
-                    <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">{order.internalOrderId || order.orderId}</div>
-                      <div className="text-xs text-gray-500 mt-0.5">{order.orderId}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900 max-w-xs truncate" title={order.productName}>
-                        {order.productName || 'N/A'}
+                  key={order.orderId}
+                  className="hover:bg-fleek-yellow-light transition-colors cursor-pointer"
+                  onClick={() => onOrderClick?.(order.orderId)}
+                >
+                  <td className="px-6 py-4">
+                    <div className="text-sm font-semibold text-fleek-black">{order.internalOrderId || order.orderId}</div>
+                    <div className="text-xs text-gray-400 mt-0.5">{order.orderId}</div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-gray-800 max-w-xs truncate font-medium" title={order.productName}>
+                      {order.productName || 'N/A'}
+                    </div>
+                    {order.includesShipping && (
+                      <span className="text-xs text-gray-500 mt-0.5 inline-block">+ Shipping</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-gray-600">{formatDate(order.createdAt || order.completedAt)}</div>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="text-sm font-medium text-gray-800">
+                      £{(order.originalFinalBase || order.amount).toFixed(2)}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="text-sm text-red-600 font-medium">
+                      -{order.commissionPercentage ? `${order.commissionPercentage}%` : 'N/A'}
+                    </div>
+                    {order.originalCommission && (
+                      <div className="text-xs text-gray-400 mt-0.5">
+                        £{order.originalCommission.toFixed(2)}
                       </div>
-                      {order.includesShipping && (
-                        <span className="text-xs text-blue-600 mt-0.5 inline-block">+ Shipping</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-600">{formatDate(order.createdAt || order.completedAt)}</div>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="text-sm text-gray-900">
-                        £{(order.originalFinalBase || order.amount).toFixed(2)}
+                    )}
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="text-sm font-bold text-fleek-black">
+                      £{(order.totalPaidAmount || order.amount).toFixed(2)}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold border ${statusConfig.className}`}>
+                      <StatusIcon className="w-3.5 h-3.5" />
+                      {statusConfig.label}
+                    </span>
+                    {getDetailsText(order) && (
+                      <div className="text-xs text-gray-400 mt-1">
+                        {getDetailsText(order)}
                       </div>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="text-sm text-red-600">
-                        -{order.commissionPercentage ? `${order.commissionPercentage}%` : 'N/A'}
-                      </div>
-                      {order.originalCommission && (
-                        <div className="text-xs text-gray-500 mt-0.5">
-                          £{order.originalCommission.toFixed(2)}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="text-sm font-semibold text-emerald-700">
-                        £{(order.totalPaidAmount || order.amount).toFixed(2)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium border ${statusConfig.className}`}>
-                        <StatusIcon className="w-3.5 h-3.5" />
-                        {statusConfig.label}
-                      </span>
-                      {getDetailsText(order) && (
-                        <div className="text-xs text-gray-500 mt-1">
-                          {getDetailsText(order)}
-                        </div>
-                      )}
-                    </td>
+                    )}
+                  </td>
                 </tr>
               );
             })}

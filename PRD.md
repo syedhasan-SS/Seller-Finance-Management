@@ -1,444 +1,496 @@
 # Product Requirements Document
-## Seller Finance Management Portal
+## Seller Financial Transparency & Payout Intelligence Portal
+
 **Version:** 1.0
-**Date:** February 2026
-**Status:** Ready for Stakeholder Review
-**Author:** Product Team
+**Date:** March 2026
+**Owner:** Seller Support
+**Status:** Draft for Review
+**Stakeholders:** Seller Support, Finance, Supply
 
 ---
 
 ## Table of Contents
 1. [Executive Summary](#1-executive-summary)
 2. [Problem Statement](#2-problem-statement)
-3. [Goals & Success Metrics](#3-goals--success-metrics)
-4. [Users & Stakeholders](#4-users--stakeholders)
-5. [Product Overview](#5-product-overview)
-6. [Feature Requirements](#6-feature-requirements)
-7. [Technical Architecture](#7-technical-architecture)
-8. [Data Model & Integrations](#8-data-model--integrations)
-9. [Security & Compliance](#9-security--compliance)
-10. [Phased Rollout Plan](#10-phased-rollout-plan)
-11. [Risks & Mitigations](#11-risks--mitigations)
-12. [Open Questions](#12-open-questions)
+3. [Solution Overview](#3-solution-overview)
+4. [User Stories & Functional Requirements](#4-user-stories--functional-requirements)
+5. [Technical Requirements](#5-technical-requirements)
+6. [Success Metrics & KPIs](#6-success-metrics--kpis)
+7. [Implementation Roadmap](#7-implementation-roadmap)
+8. [Risks & Mitigation Strategies](#8-risks--mitigation-strategies)
+9. [Dependencies & Assumptions](#9-dependencies--assumptions)
+10. [Open Questions](#10-open-questions)
 
 ---
 
 ## 1. Executive Summary
 
-The **Seller Finance Management Portal** is a self-service web application that gives marketplace suppliers real-time visibility into their payout timelines, order-level financial breakdowns, and payment status — eliminating their current reliance on manual support requests to understand when and how much they will be paid.
+### 1.1 Product Vision
 
-**Current State:** MVP built and pilot-tested across 7 suppliers covering **18,785 orders** and **£1.6M in payout value**. Results validated. Ready for production deployment.
+We are building a comprehensive **Seller Financial Transparency & Payout Intelligence Portal** — a supplier-facing financial system that enables sellers to independently view, track, reconcile, and understand their weekly payouts with complete transparency and predictive intelligence.
 
-**Business Impact:**
-- Reduce supplier support tickets related to payment inquiries
-- Increase supplier trust and retention through financial transparency
-- Enable the operations team to scale supplier onboarding without proportional support overhead
+Today, suppliers receive payout statements via chat (Sendbird) and must manually retrieve historical records from message threads. They have zero visibility into when orders become eligible for payout, what holds or delays may occur, or how their payment timeline is calculated. This approach does not scale — especially for large suppliers — and creates significant operational burden.
+
+> **This is not a feature enhancement. This is financial infrastructure.**
+
+### 1.2 What This Initiative Delivers
+
+| Pillar | Outcome |
+|--------|---------|
+| **Centralise** | All payout and financial data in one structured, self-service portal |
+| **Enable** | Statement-level and order-level visibility with complete transparency |
+| **Predict** | Payout timelines with clear explanations of holds and delays |
+| **Reduce** | Repetitive finance-related support tickets by ≥ 40% |
+| **Improve** | Supplier trust through proactive financial communication |
+| **Establish** | Foundation for a scalable seller finance ecosystem |
+
+### 1.3 Current Build Status
+
+An MVP has been built and pilot-tested:
+
+| Dimension | Status |
+|-----------|--------|
+| Frontend portal (React + TypeScript) | ✅ Complete |
+| BigQuery integration (live financial data) | ✅ Complete |
+| JWT authentication | ✅ Complete |
+| Payout timeline, orders table, income statement | ✅ Complete |
+| Pilot test — 7 suppliers, 18,785 orders, £1.6M payout value | ✅ Passed |
+| Production deployment (Vercel) | ✅ Live |
+| Password hashing (bcrypt) | ⚠️ Pending — pre-production blocker |
 
 ---
 
 ## 2. Problem Statement
 
-### For Suppliers
-Marketplace suppliers currently have no self-service way to:
-- Know when their next payout will arrive or how much it will be
-- Understand which specific orders are included in an upcoming payout
-- Identify what is blocking or delaying a payment
-- View a breakdown of how their payout amount was calculated (commissions, refunds, fees)
+### 2.1 Current State: How Payouts Work Today
 
-As a result, suppliers frequently contact support for payment status updates — creating friction, eroding trust, and consuming operations bandwidth.
+**Current financial workflow for suppliers:**
+- Weekly payout statements are shared via **Sendbird chat every Monday**
+- Payments are processed **Tuesday through Thursday**
+- Historical statements remain **buried inside chat threads**
+- No structured financial visibility exists inside the vendor application
+- Sellers have **zero visibility** into when orders become eligible for payout
+- No explanation is provided for holds, delays, or deductions unless the seller contacts Seller Support or KAM
 
-### For Operations / Finance
-- Support agents must manually query internal systems to answer "when do I get paid?" questions
-- There is no structured way to surface payment blockers to suppliers proactively
-- The lack of transparency creates disputes when payout amounts don't match supplier expectations
+### 2.2 Key Issues & Pain Points
 
-### Opportunity
-By surfacing the financial data already available in our BigQuery data warehouse directly to suppliers through a clean, self-service portal, we can eliminate a significant category of support requests and meaningfully improve supplier satisfaction.
+**Issue #1 — Manual Reconciliation Burden**
+Suppliers must manually search chat history and reconcile externally using spreadsheets. For large suppliers with hundreds of orders per week, this is time-consuming and error-prone. The Seller Support team spends multiple hours per day on reconciliation.
 
----
+**Issue #2 — High Ticket Volume**
 
-## 3. Goals & Success Metrics
+| Period | Volume |
+|--------|--------|
+| Oct 2025 – Jan 2026 | **1,172 finance-related support tickets** |
+| Monthly average | **~293 tickets/month** |
+| Informational requests (pure visibility gap) | **54–64%** |
+| Reconciliation complaints | **36%** |
 
-### Primary Goals
-| Goal | Metric | Target |
-|------|--------|--------|
-| Reduce payment-related support tickets | % reduction in payment inquiry tickets | ≥ 40% within 60 days of launch |
-| Improve supplier payment transparency | Suppliers who understand their payout breakdown | ≥ 80% (via post-launch survey) |
-| Achieve supplier self-service adoption | % of active suppliers logging in monthly | ≥ 70% within 90 days |
-| Establish data accuracy baseline | Payout amounts matching actuals | 100% (zero tolerance) |
+*The majority of these tickets could be eliminated with self-service visibility.*
 
-### Secondary Goals
-- Reduce average time-to-resolution for payment disputes
-- Establish foundation for future supplier financial tooling (invoicing, tax documents, forecasting)
+**Issue #3 — Operational Burden**
+- Manual checks by Seller Support and Finance teams for routine queries
+- Repeated explanations of the same payout policies and calculations
+- Delayed escalations due to lack of structured data access
+- Multi-day reconciliation visits for zone sellers (untracked time cost)
+- Manual BigQuery data pulls by technical teams (~15/week)
 
----
+**Issue #4 — Supplier Trust & Retention**
+- Limited transparency around commissions, deductions, and payment timing
+- No visibility into why payouts are delayed or held
+- Larger suppliers experience higher reconciliation friction
+- Growing suppliers feel the platform doesn't scale with their business
 
-## 4. Users & Stakeholders
+**Issue #5 — No Predictive Intelligence**
+Sellers cannot answer basic questions without contacting support:
+- *"When will I be paid for this order?"*
+- *"What is blocking my payout?"*
+- *"When does the return window end?"*
+- *"Why was my bank verification rejected?"*
 
-### Primary Users — Marketplace Suppliers
-Sellers who list and fulfil products on the marketplace. They need to understand:
-- When they'll be paid
-- How much they'll receive
-- Why an order is held or excluded
+### 2.3 Root Cause Analysis
 
-**Characteristics:**
-- Non-technical users; expect a clean, simple interface
-- May manage multiple order lines simultaneously
-- Operate in GBP; UK-based or UK-transacting
-
-### Internal Stakeholders
-| Stakeholder | Role | Interest |
-|-------------|------|----------|
-| Operations Team | Day-to-day | Reduced supplier payment queries |
-| Finance Team | Data accuracy | Correct payout calculations surfaced to suppliers |
-| Engineering | Build & maintain | Clear specs, secure architecture |
-| Leadership / Exec | Strategic | Supplier NPS, support cost reduction |
+**There is no centralised, self-service financial system for suppliers.** Financial data exists in fragmented systems (ledger, chat, support tickets, BigQuery) with no unified supplier-facing interface.
 
 ---
 
-## 5. Product Overview
+## 3. Solution Overview
 
-### Pages & Navigation
+### 3.1 Product Scope
 
-```
-/ (Login)
-├── /dashboard       → Payout overview, recent orders, blockers, trust score
-├── /orders          → Full order table with all financial fields, search & filter
-└── /income-statement
-    └── /:statementId → Line-by-line P&L breakdown for a given period
-```
+We are developing a unified **Seller Financial Transparency & Payout Intelligence Portal** with three integrated capabilities:
 
-### High-Level User Journey
-1. Supplier receives an email with their portal link
-2. They log in with email + password credentials (provisioned by ops team)
-3. They land on the **Dashboard**, which shows:
-   - Upcoming payout amount + estimated date
-   - Current payment cycle progress
-   - Active blockers (if any)
-   - Trust/risk score
-4. They can drill into **Orders** to see a full breakdown of every order and its financial impact
-5. They can view their **Income Statement** for a period-level P&L summary
+| Capability | Purpose | Key Features |
+|------------|---------|--------------|
+| **Financial Transparency Portal** | Replace chat-based statement delivery with structured, self-service financial access | Statement history, order breakdown, reconciliation tools, export |
+| **Payout Timeline Intelligence** | Show sellers exactly when they'll be paid and why, with order-level precision | Predictive dates, lifecycle tracking, hold explanations |
+| **Proactive Blockers & Alerts** | Surface issues preventing payouts and guide sellers to resolution | Active holds, actionable next steps, notifications, progress tracking |
 
----
+### 3.2 Core Capabilities
 
-## 6. Feature Requirements
+#### Capability 1: Financial Transparency Portal
+**Purpose:** Replace chat-based statement delivery with structured, self-service financial access
 
-### 6.1 Authentication & Access
+**Features:**
+- Weekly payout statement history (downloadable as PDF/Excel)
+- Order-level financial breakdown across all 14 financial fields:
+  - Internal Order ID, Product Name, Vendor, Payout Status, Created At
+  - Latest Status, Includes Shipping flag
+  - Original Final Base (£), Commission (%), Commission Amount (£)
+  - Base After Commission (£), Vendor Shipping Cost (£)
+  - Supplier Refund (£), Cancellation Fee (£), Total Paid Amount (£)
+- Search and filter by date range, order ID, status
+- Reconciliation tools with expected vs. actual payout comparison
+- Export capabilities for external accounting systems
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| AUTH-1 | Suppliers log in with email and password | Must Have |
-| AUTH-2 | Sessions are managed via JWT tokens (short-lived, secure) | Must Have |
-| AUTH-3 | Passwords stored as bcrypt hashes — no plain-text storage | Must Have |
-| AUTH-4 | Each supplier only sees their own data (vendor ID-scoped) | Must Have |
-| AUTH-5 | Failed login attempts surface a clear error message | Must Have |
-| AUTH-6 | Session timeout after inactivity | Should Have |
-| AUTH-7 | Password reset via email flow | Should Have |
+#### Capability 2: Payout Timeline Intelligence
+**Purpose:** Show sellers exactly when they'll be paid and why, with order-level precision
 
----
+**Features:**
+- Predictive payout date for each order (based on completion, QC, return window)
+- Clear explanation of payout timeline: `Order Completed → QC Approved → Eligible → Payout Cycle → Paid`
+- Return window countdown (*"8 days until eligible for payout"*)
+- Hold reasons with standardised codes and plain-language explanations
+- Next payout cycle dashboard with total amount and order count
+- Confidence indicator (High / Medium / Low) for upcoming payout
 
-### 6.2 Dashboard
+#### Capability 3: Proactive Blockers & Alerts
+**Purpose:** Surface issues preventing payouts and guide sellers to resolution
 
-The main landing page after login. Gives a at-a-glance view of the supplier's financial position.
-
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| DASH-1 | Display upcoming payout amount (GBP) | Must Have |
-| DASH-2 | Display estimated payout date and days remaining | Must Have |
-| DASH-3 | Show payout confidence level (High / Medium / Low) | Must Have |
-| DASH-4 | Render a payout timeline showing current stage in the payment cycle | Must Have |
-| DASH-5 | List active blockers preventing or delaying payout with explanation | Must Have |
-| DASH-6 | Show trust/quality score with trend (improving / stable / declining) | Must Have |
-| DASH-7 | Display payout history (last 5 payouts) with amount, date, order count | Must Have |
-| DASH-8 | Show recent orders table with status indicators | Must Have |
-| DASH-9 | Manual refresh button to reload live data | Should Have |
-| DASH-10 | Loading and error states for all data sections | Must Have |
+**Features:**
+- Active blockers dashboard showing all holds and delays
+- Actionable next steps for each blocker (*"Complete bank verification", "Upload missing documents"*)
+- Email and in-app notifications for: payout processed, new hold applied, action required
+- Estimated resolution time for each blocker
+- Progress tracking for verification steps (*"2 of 3 steps complete"*)
 
 ---
 
-### 6.3 Orders Table
+## 4. User Stories & Functional Requirements
 
-Full financial breakdown across all of a supplier's order lines.
+### 4.1 Primary User Personas
 
-#### Display Fields (all 14 required fields)
-| # | Field | Description |
-|---|-------|-------------|
-| 1 | Internal Order ID | Platform-level order identifier |
-| 2 | Product Name | Item title as listed on the marketplace |
-| 3 | Vendor | Supplier handle |
-| 4 | Payout Status | `eligible` / `pending_eligibility` / `held` / `paid` / `failed` / `cancelled` |
-| 5 | Created At | Order creation date |
-| 6 | Latest Status | Most recent fulfilment/QC status |
-| 7 | Includes Shipping | Boolean flag |
-| 8 | Original Final Base (£) | Base price before any deductions |
-| 9 | Commission (%) | Marketplace commission rate |
-| 10 | Original Commission (£) | Commission amount deducted |
-| 11 | Base After Commission (£) | Net base after commission |
-| 12 | Vendor Shipping Cost (£) | Shipping amount attributable to supplier |
-| 13 | Supplier Refund (£) | Refund amount deducted |
-| 14 | Cancellation Fee (£) | Fee applied for cancellations |
-| 15 | Total Paid Amount (£) | Final payout amount for this order line |
+| Persona | Characteristics | Primary Goals |
+|---------|----------------|---------------|
+| **Small Seller** | 1–50 orders/week, solo or small team, limited finance expertise | Know when I'll be paid, understand holds, access statements easily |
+| **Medium Seller** | 50–200 orders/week, dedicated finance person, growing business | Efficient reconciliation, track deductions, reduce manual work |
+| **Large Seller** | 200+ orders/week, finance team, enterprise needs | Bulk export, API access, automated reconciliation, zero manual lookups |
+| **Finance/Ops Team** | Internal team managing seller payouts and issues | Monitor sellers, prevent escalations, quick issue resolution |
 
-#### Functional Requirements
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| ORD-1 | Display all 14 financial fields per order line | Must Have |
-| ORD-2 | Filter orders by payout status | Must Have |
-| ORD-3 | Search orders by order number, internal ID, or product name | Must Have |
-| ORD-4 | Paginate results (default 100 per page) | Must Have |
-| ORD-5 | Sort by date, amount, or status | Should Have |
-| ORD-6 | Display order-level hold reasons when status is `held` | Must Have |
-| ORD-7 | Show QC status and fulfilment status per order | Should Have |
-| ORD-8 | Export orders to CSV | Nice to Have |
+### 4.2 Core User Stories
+
+#### For Small Sellers (1–50 orders/week)
+
+**US-1: View Upcoming Payout**
+> *As a small seller, I want to see when my next payout will arrive and how much I'll receive, so I can plan my cash flow and know when to expect funds in my bank account.*
+
+Acceptance Criteria:
+- Dashboard shows next payout date prominently
+- Total payout amount displayed with order count
+- Countdown timer showing days until payout
+- Clear status indicator (Processing, On Track, Delayed)
+
+**US-2: Understand Order Timeline**
+> *As a small seller, I want to know when a specific order will be paid, so I understand the payout process and can set expectations.*
+
+Acceptance Criteria:
+- Click on any order to see detailed lifecycle timeline
+- Visual timeline showing: `Completed → QC → Eligible → Payout`
+- Each step shows date/time and status (completed, pending, future)
+- Clear explanation of return window and eligibility date
+
+**US-3: Access Historical Statements**
+> *As a small seller, I want to view all my past payout statements in one place, so I can reconcile payments without searching through chat messages.*
+
+Acceptance Criteria:
+- Payout history page showing all weekly statements
+- Filter by date range (last 7 days, 30 days, 90 days, custom)
+- Each statement shows date, amount, order count, status
+- Download individual statements as PDF or Excel
+
+#### For Medium/Large Sellers (50–500+ orders/week)
+
+**US-4: Bulk Reconciliation**
+> *As a large seller, I want to reconcile hundreds of orders efficiently, so I can verify all payments without manual spreadsheet work.*
+
+Acceptance Criteria:
+- Export all orders for a period as CSV/Excel with all 14 financial fields
+- Bulk filter by status, date range, amount discrepancy
+- Summary row showing totals per column
+- Flag orders where actual payout differs from expected
+
+**US-5: Understand Deductions**
+> *As a medium seller, I want to see exactly what was deducted from each order, so I can understand my net payout and identify discrepancies.*
+
+Acceptance Criteria:
+- Order detail view shows: Gross Sale, Commission (%), Platform Fees, Refunds, Net Payout
+- Clear calculation breakdown with percentages
+- Highlight unusual deductions or adjustments
+- Link to fee policy documentation
+
+**US-6: Resolve Payout Issues**
+> *As a large seller, I want to see why my payout is delayed and how to fix it, so I can take action quickly without opening a support ticket.*
+
+Acceptance Criteria:
+- Active blockers section shows all holds and delays
+- Each blocker displays: reason, impact, estimated resolution time
+- Actionable buttons: *"Complete Verification"*, *"Upload Documents"*
+- Progress tracking for multi-step verification
+
+#### For Finance/Operations Teams
+
+**US-7: Monitor Seller Issues**
+> *As a finance team member, I want to see which sellers have payout issues, so I can proactively reach out before they escalate.*
+
+Acceptance Criteria:
+- Internal dashboard showing sellers with active holds
+- Filter by risk level, hold type, pending verification
+- Seller health score indicating likelihood of issues
+- One-click access to seller's full financial profile
 
 ---
 
-### 6.4 Income Statement
+## 5. Technical Requirements
 
-Period-level financial summary view.
+### 5.1 System Architecture
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| INC-1 | List available statement periods (weekly/monthly) | Must Have |
-| INC-2 | Show revenue, commission, fees, refunds, and net payout per period | Must Have |
-| INC-3 | Drill down into a specific statement for line-by-line breakdown | Must Have |
-| INC-4 | Display running totals and comparisons to prior period | Should Have |
+| Component | Technology | Purpose |
+|-----------|-----------|---------|
+| **Frontend** | React 18, TypeScript 5.5, Tailwind CSS, Vite | Seller dashboard and order detail views |
+| **Backend API** | Node.js/Express, Vercel Serverless Functions | Business logic, data aggregation, authentication |
+| **Authentication** | JWT (jsonwebtoken) + bcrypt | Secure seller login and session management |
+| **Database** | Google BigQuery (read-only) | Live financial data — ledger, payouts, orders |
+| **Notification Service** | SendGrid / Twilio / Firebase | Email, SMS, in-app notifications (Phase 2) |
+| **Deployment** | Vercel (CDN + Serverless) | Global edge deployment, auto-scaling |
+| **Analytics** | BigQuery + internal dashboards | Operational metrics, ticket deflection tracking |
 
----
-
-### 6.5 Payout Timeline
-
-Visual representation of the payment processing stages.
-
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| TL-1 | Show payment cycle stages (Order Received → QC → Eligibility → Payout) | Must Have |
-| TL-2 | Highlight the current stage for the active payout | Must Have |
-| TL-3 | Show date milestones for completed and upcoming stages | Must Have |
-| TL-4 | Mark stages blocked by active holds | Must Have |
-
----
-
-### 6.6 Trust Score & Active Blockers
-
-Transparency into risk factors and payment holds.
-
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| TS-1 | Display numerical trust/quality score (0–100) | Must Have |
-| TS-2 | Show risk level: Low / Medium / High | Must Have |
-| TS-3 | List top score drivers (negative and positive factors) with impact | Must Have |
-| TS-4 | Show score trend over time | Should Have |
-| BLK-1 | List all active payment blockers with reason code and description | Must Have |
-| BLK-2 | Indicate severity level per blocker (Info / Warning / Error) | Must Have |
-| BLK-3 | Show estimated resolution timeline per blocker | Must Have |
-| BLK-4 | Surface action buttons where the supplier can resolve a blocker | Nice to Have |
-
----
-
-## 7. Technical Architecture
-
-### System Diagram
-
+**Architecture Flow:**
 ```
 Supplier Browser
       │
       ▼
-  Vercel CDN  ──── Static Assets (React SPA) ──▶ Tailwind / Lucide UI
+  Vercel CDN  ──── React SPA (Static Assets)
       │
       ▼
 Vercel Serverless Functions (/api/*)
-      │
-      ├── POST /api/auth/login        → Authenticate, return JWT
-      ├── GET  /api/sellers/:id/payout → Payout summary, history, trust score
-      └── GET  /api/sellers/:id/orders → Order lines with 14 financial fields
+  ├── POST /api/auth/login        → JWT authentication
+  ├── GET  /api/sellers/:id/payout → Payout summary, history, blockers
+  └── GET  /api/sellers/:id/orders → Order lines with 14 financial fields
       │
       ▼
-  Google BigQuery
-  ├── aurora_postgres_public.balance_transaction   (financial ledger)
-  ├── aurora_postgres_public.payout                (payout records)
-  ├── aurora_postgres_public.vendors               (supplier registry)
-  └── fleek_analytics.vendor_payout                (enriched order data)
+  Google BigQuery (dogwood-baton-345622)
+  ├── aurora_postgres_public.balance_transaction  (financial ledger)
+  ├── aurora_postgres_public.payout               (payout records)
+  ├── aurora_postgres_public.vendors              (supplier registry)
+  └── fleek_analytics.vendor_payout               (enriched order data)
 ```
 
-### Frontend
-| Concern | Technology |
-|---------|------------|
-| Framework | React 18.3 + TypeScript 5.5 |
-| Routing | React Router v7 |
-| Styling | Tailwind CSS 3.4 |
-| Icons | Lucide React |
-| Build Tool | Vite 5.4 |
-| Bundle Size | ~69–128 KB (gzipped) |
+### 5.2 Data Model
 
-### Backend
-| Concern | Technology |
-|---------|------------|
-| API Runtime | Vercel Serverless Functions (Node.js) |
-| Auth | JWT (`jsonwebtoken`) + bcrypt (`bcryptjs`) |
-| BigQuery Client | `@google-cloud/bigquery` v8 |
-| CORS | `cors` middleware |
+**Core Entities:**
 
-### Key Environment Variables
-| Variable | Purpose |
-|----------|---------|
-| `JWT_SECRET` | Signing key for JWTs — must be a long, random string |
-| `GOOGLE_APPLICATION_CREDENTIALS` | Service account JSON for BigQuery access |
-| `VITE_USE_BIGQUERY` | `true` for production, `false` for dev/sample data |
-| `VITE_BIGQUERY_PROJECT_ID` | GCP project ID (`dogwood-baton-345622`) |
+| Entity | Key Fields |
+|--------|-----------|
+| `payout_cycle` | cycle_id, seller_id, cycle_date, total_amount, status |
+| `balance_transaction` | order_line_id, destination_id, final_base, commission_%, shipping, refund, cancellation_fee, total_payable, status |
+| `payout` | id, destination_id, amount, currency, status, created_at |
+| `vendors` | id, handle, email, password_hash |
 
----
-
-## 8. Data Model & Integrations
-
-### Core Data Entities
-
-#### Order Line (`balance_transaction` + `vendor_payout`)
-```
-order_line_id          → Unique order line identifier
-internal_order_id      → Platform order reference
-destination_id         → Vendor/supplier ID
-status                 → eligible | pending_eligibility | held | paid | failed | cancelled
-final_base_smallest_unit      → Base price (pence)
-commission_percentage         → Commission rate
-shipping_amount_smallest_unit → Shipping cost (pence)
-refund_amount_smallest_unit   → Refund (pence)
-cancellation_fee_smallest_unit → Cancellation fee (pence)
-total_payable_smallest_unit   → Net payout (pence)
-created_at             → Order date
-```
-
-#### Payout Record (`payout`)
-```
-id                     → Payout batch ID
-destination_id         → Vendor ID
-amount_smallest_unit   → Total payout (pence)
-status                 → completed | pending | failed
-created_at             → Payout date
-```
-
-#### Vendor (`vendors`)
-```
-id                     → Numeric vendor ID
-handle                 → URL-friendly vendor slug (e.g. "vibe-vintage")
-email                  → Login email
-password_hash          → bcrypt hash
-```
-
-### BigQuery Access Pattern
-- All queries are **read-only** (SELECT only)
-- Queries are vendor-scoped: `WHERE CAST(destination_id AS INT64) = :vendorId`
+**Financial Field Mapping (all monetary values in GBP):**
+- All values stored in smallest unit (pence) in BigQuery; divided by 100 for display
+- Vendor scoping enforced on every query: `WHERE CAST(destination_id AS INT64) = :vendorId`
 - Soft-delete filtering: `WHERE _fivetran_deleted = FALSE`
-- All monetary values stored in smallest unit (pence); divided by 100 before display
 
----
+### 5.3 Integration Requirements
 
-## 9. Security & Compliance
+- **BigQuery:** Read-only access via Google service account; `@google-cloud/bigquery` npm package
+- **Authentication:** JWT tokens (7-day expiry); bcrypt password hashing (cost factor 10)
+- **CORS:** Configured to restrict cross-origin API access to known domains
+- **Environment Variables:** `JWT_SECRET`, `GOOGLE_APPLICATION_CREDENTIALS_JSON`, `VITE_USE_BIGQUERY`
 
-### Current Status
-| Control | Status | Notes |
-|---------|--------|-------|
-| JWT authentication | ✅ Implemented | Tokens issued on login |
-| Password hashing (bcrypt) | ⚠️ Pending | Login endpoint currently accepts any password — **MUST fix before production** |
-| JWT secret hardening | ⚠️ Pending | Placeholder secret in code — **MUST set real `JWT_SECRET` env var** |
+### 5.4 Performance Requirements
+
+| Metric | Target |
+|--------|--------|
+| Dashboard load time | < 2 seconds (P95) |
+| Orders table load (100 rows) | < 3 seconds (P95) |
+| API uptime | ≥ 99.5% |
+| Concurrent sellers supported | ≥ 500 |
+
+### 5.5 Security & Compliance
+
+| Control | Status | Detail |
+|---------|--------|--------|
+| JWT authentication | ✅ Implemented | Tokens issued on login, 7-day expiry |
+| Password hashing (bcrypt) | ⚠️ Pre-production blocker | Must implement before supplier access |
 | Vendor data isolation | ✅ Implemented | All queries scoped to authenticated vendor ID |
-| HTTPS / TLS | ✅ Vercel-managed | Enforced automatically |
-| BigQuery access (read-only) | ✅ Service account | No write access |
-| CORS policy | ✅ Configured | Restricts cross-origin API access |
-
-### Pre-Production Security Checklist
-- [ ] Implement `bcrypt.compare(password, supplier.password_hash)` in `/api/auth/login.ts` (line 67)
-- [ ] Set `JWT_SECRET` to a cryptographically random 64-character string in Vercel environment
-- [ ] Set `VITE_USE_BIGQUERY=true` and configure BigQuery service account in Vercel
-- [ ] Rotate any credentials used during development/piloting
-- [ ] Review Vercel function logs access controls
+| HTTPS / TLS | ✅ Vercel-managed | Enforced automatically on all endpoints |
+| BigQuery access (read-only) | ✅ Service account | No write access granted |
+| Data retention | Requirement | 7 years for financial records (compliance) |
+| Penetration testing | Required | Before production launch |
 
 ---
 
-## 10. Phased Rollout Plan
+## 6. Success Metrics & KPIs
 
-### Phase 1 — Security Hardening & Production Launch (Week 1–2)
-**Goal:** Fix the two security gaps and deploy to production on Vercel.
+### 6.1 North Star Metric
 
-**Tasks:**
-- Implement bcrypt password verification in login endpoint
-- Set production JWT secret and BigQuery credentials in Vercel environment
-- Switch `VITE_USE_BIGQUERY=true`
-- QA test against live BigQuery data with 1–2 suppliers
-- Deploy to Vercel production URL
-- Provision credentials for all 7 pilot suppliers
+**Finance-related ticket rate per 1,000 active sellers per month**
 
-**Exit Criteria:** All 7 pilot suppliers can log in and view their live payout data.
+| Period | Tickets/Month |
+|--------|--------------|
+| Baseline (Oct 2025 – Jan 2026) | **293** |
+| Target at 60 days post-launch | **≤ 176 (−40%)** |
+| Stretch goal at 90 days | **≤ 146 (−50%)** |
+
+### 6.2 Operational Impact Metrics
+
+| Metric | Baseline | Target (60 days) | Owner |
+|--------|----------|-----------------|-------|
+| Finance tickets/month | 293 | ≤ 176 (−40%) | Support |
+| Average resolution time | 48 hours | < 24 hours | Support |
+| Manual BigQuery pulls/week | ~15 | < 5 | Tech |
+| Support hours saved/month | — | ≥ 23 hours | Ops |
+
+### 6.3 Supplier Impact Metrics
+
+| Metric | Target (60 days) | Target (90 days) |
+|--------|-----------------|-----------------|
+| Monthly active adoption rate | ≥ 50% | ≥ 70% |
+| Positive feedback on payout clarity | ≥ 75% | ≥ 80% |
+| Self-service reconciliation rate | ≥ 60% | ≥ 75% |
+| Statement download rate | ≥ 40% | ≥ 60% |
+
+### 6.4 Data Accuracy & System Reliability
+
+| Metric | Target |
+|--------|--------|
+| Payout data accuracy vs. ledger | 100% match |
+| Discrepancy resolution SLA | ≤ 48 hours |
+| Vendor data isolation — zero cross-contamination | 100% |
+| System uptime | ≥ 99.5% |
 
 ---
 
-### Phase 2 — Controlled Rollout (Week 3–6)
-**Goal:** Expand to all active suppliers, gather feedback, resolve issues.
+## 7. Implementation Roadmap
 
-**Tasks:**
-- Onboard remaining active suppliers (ops team provisions credentials)
-- Monitor API error rates and BigQuery query performance
-- Collect supplier feedback (short in-app survey or email)
-- Resolve any data discrepancy reports immediately
-- Add email notification for upcoming payout (optional, ops-driven)
+### Phase 1 — Security Hardening & Production Launch *(Weeks 1–2)*
+**Goal:** Fix pre-production security gaps and onboard pilot suppliers
+
+| Task | Owner | Priority |
+|------|-------|----------|
+| Implement bcrypt password verification in login endpoint | Engineering | Critical |
+| Set production JWT secret (cryptographically random) | Engineering | Critical |
+| Set Google service account credentials in Vercel | Engineering | Critical |
+| QA test against live BigQuery data with 2–3 suppliers | Engineering + Support | High |
+| Provision credentials for all 7 pilot suppliers | Operations | High |
+| Confirm payout data accuracy with Finance team | Finance | High |
+
+**Exit Criteria:** All 7 pilot suppliers can log in and view their accurate live payout data.
+
+---
+
+### Phase 2 — Controlled Rollout *(Weeks 3–6)*
+**Goal:** Expand to all active suppliers, measure impact, resolve issues
+
+| Task | Owner |
+|------|-------|
+| Onboard remaining active suppliers (ops provisions credentials) | Operations |
+| Monitor API error rates and BigQuery query performance | Engineering |
+| Collect supplier feedback (in-app survey or email) | Support |
+| Resolve data discrepancy reports within 48-hour SLA | Finance + Engineering |
+| Track ticket volume reduction vs. baseline | Support |
+| Password reset via email flow | Engineering |
 
 **Exit Criteria:**
 - ≥ 80% of active suppliers onboarded
 - Zero unresolved payout data inaccuracies
-- Support ticket volume for payment queries measurably reduced
+- ≥ 20% reduction in finance-related support tickets observed
 
 ---
 
-### Phase 3 — Optimisation & Feature Expansion (Month 2–3)
-**Goal:** Improve UX and add highest-value missing features based on Phase 2 feedback.
+### Phase 3 — Intelligence & Optimisation *(Month 2–3)*
+**Goal:** Add predictive features and close UX gaps from Phase 2 feedback
 
 **Candidate Features (prioritised by supplier demand):**
-- Password reset via email
-- CSV export of orders
-- Payout notifications (email alerts when payout is processed)
+- Payout notifications (email/SMS when payout is processed or held)
+- CSV/Excel bulk export for large seller reconciliation
+- Predictive eligibility dates (calculated from QC time + return window logic)
 - Prior-period income statement comparisons
 - Mobile-responsive improvements
+- Dynamic trust/quality score from live BigQuery data
 
-**Exit Criteria:** NPS from supplier feedback ≥ 7/10. Support ticket reduction ≥ 40%.
+**Exit Criteria:** Supplier NPS ≥ 7/10. Finance ticket reduction ≥ 40% sustained.
 
 ---
 
-### Phase 4 — Scale & Advanced Features (Month 3+)
-**Goal:** Build towards a full supplier financial hub.
+### Phase 4 — Scale & Advanced Features *(Month 3+)*
+**Goal:** Build towards a full supplier financial hub
 
-**Future Roadmap Items:**
-- Tax document generation (VAT summaries)
-- Bank account management (self-service updates with verification)
-- Payout forecasting (predictive models from order pipeline)
+**Future Roadmap:**
+- Tax document generation (VAT summaries, annual statements)
+- Self-service bank account management with verification
+- Payout forecasting (predictive from order pipeline)
+- API access for large suppliers to pull data programmatically
 - Multi-currency support
-- API access for larger suppliers to pull data programmatically
+- Finance/Ops internal dashboard (seller health monitoring, proactive escalation)
 
 ---
 
-## 11. Risks & Mitigations
+## 8. Risks & Mitigation Strategies
 
 | Risk | Likelihood | Impact | Mitigation |
 |------|-----------|--------|------------|
-| Payout data shown to wrong supplier | Low | Critical | Vendor ID enforced at every query; auth middleware validated |
-| BigQuery query costs spike under load | Medium | Medium | Add query result caching (Redis or Vercel KV); set BigQuery cost alerts |
-| Supplier disputes payout amount shown | Medium | High | Data is read-only from source of truth; add "last refreshed" timestamp for clarity |
+| Payout data shown to wrong supplier | Low | Critical | Vendor ID enforced at every query; auth middleware validated on all endpoints |
+| Data inaccuracy / payout discrepancy shown to supplier | Medium | Critical | Finance team sign-off before launch; 48h SLA on discrepancy resolution |
+| Password security breach (pre-production) | Medium | Critical | Implement bcrypt before any supplier access; rotate dev credentials |
+| BigQuery query costs spike under load | Medium | Medium | Add query result caching (Redis/Vercel KV); set GCP cost alerts |
+| JWT secret exposure | Low | Critical | Store only in Vercel env vars; never commit to git; rotate regularly |
+| Supplier disputes payout amount shown | Medium | High | Read-only from source of truth; add "last refreshed" timestamp |
 | Login brute-force attack | Medium | High | Add rate limiting on `/api/auth/login`; monitor failed attempts |
-| JWT secret exposure | Low | Critical | Store only in Vercel env vars; rotate regularly; never commit to git |
-| Supplier loses access credentials | High | Low | Implement self-service password reset (Phase 3); ops team can re-provision in interim |
+| Support team resistance to change | Medium | Medium | Co-design with support team, gradual rollout, quick win metrics |
+| Scope creep during rollout | High | Medium | Strict change control; defer non-essential features to Phase 2/3 |
 
 ---
 
-## 12. Open Questions
+## 9. Dependencies & Assumptions
 
-| # | Question | Owner | Target Resolution |
-|---|----------|-------|-------------------|
-| 1 | Who provisions supplier credentials for initial launch — ops team or automated? | Operations | Before Phase 1 launch |
-| 2 | What is the agreed payout cycle cadence communicated to suppliers (weekly, bi-weekly)? | Finance | Before Phase 1 launch |
-| 3 | Should trust score logic be dynamic (from BigQuery) or remain static in Phase 1? | Product / Engineering | Phase 1 scoping |
-| 4 | What is the SLA for resolving reported data inaccuracies post-launch? | Finance / Engineering | Before Phase 2 |
-| 5 | Are there GDPR / data retention requirements for storing supplier credentials? | Legal / Compliance | Before Phase 1 launch |
-| 6 | Should income statements be weekly or monthly periods by default? | Finance | Before Phase 1 launch |
+### 9.1 Technical Dependencies
+- Read access to BigQuery financial ledger (`aurora_postgres_public`, `fleek_analytics`)
+- Google service account with BigQuery Data Viewer role in GCP project `dogwood-baton-345622`
+- Vercel deployment with production environment variables configured
+- Email infrastructure for password reset and notifications (Phase 2)
+
+### 9.2 Organisational Dependencies
+- **Finance team** sign-off on payout calculation logic and data accuracy before launch
+- **Legal/Compliance** review of financial data disclosure and 7-year retention requirement
+- **Seller Support** team training on portal and updated escalation workflows
+- **Operations** team to provision supplier credentials for initial launch
+- **Executive sponsorship** for change management and supplier communication
+
+### 9.3 Assumptions
+- Payout cycle cadence (weekly, Monday) remains unchanged during rollout
+- All active suppliers have email addresses registered in the `vendors` table in BigQuery
+- The Finance team can validate payout calculation accuracy within the Phase 1 timeline
+- Suppliers are willing to self-serve once given access (adoption ≥ 50% within 60 days)
 
 ---
 
-*This PRD was prepared based on the current codebase state (v1.0.0), pilot test results across 7 suppliers, and stakeholder conversations. It is a living document and will be updated as requirements evolve.*
+## 10. Open Questions
+
+| # | Question | Owner | Priority | Target Date |
+|---|----------|-------|----------|-------------|
+| 1 | Who provisions supplier credentials for initial launch — ops team or automated self-signup? | Operations | High | Before Phase 1 |
+| 2 | What is the agreed payout cycle cadence to communicate to suppliers (weekly on Monday)? | Finance | High | Before Phase 1 |
+| 3 | Should quality/trust score be dynamic (from BigQuery) or remain static in Phase 1? | Product + Engineering | Medium | Phase 1 scoping |
+| 4 | What is the SLA for resolving reported data inaccuracies post-launch? | Finance + Engineering | High | Before Phase 2 |
+| 5 | Are there GDPR / data retention requirements for storing supplier credentials and financial data? | Legal / Compliance | High | Before Phase 1 |
+| 6 | Should income statements be weekly or monthly periods by default? | Finance | Medium | Before Phase 1 |
+| 7 | Is a separate internal Finance/Ops dashboard in scope for Phase 1 or deferred to Phase 4? | Product | Medium | Phase 1 scoping |
+| 8 | Will suppliers self-manage their bank details on the portal, or remain ops-managed? | Operations | Low | Phase 3 scoping |
+
+---
+
+*This PRD was prepared based on: (1) internal requirements documentation, (2) Notion product brief, (3) pilot test results across 7 suppliers — 18,785 orders, £1.6M in payout value, and (4) the current codebase state (v1.0.0, live at seller-finance-management.vercel.app). It is a living document and will be updated as requirements evolve.*
+
+*Prepared for stakeholder review — March 2026*

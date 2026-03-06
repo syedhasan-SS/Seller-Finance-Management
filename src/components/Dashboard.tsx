@@ -102,7 +102,7 @@ export const Dashboard: React.FC = () => {
             <p className="text-gray-600 mb-6">{error}</p>
             <button
               onClick={handleRefresh}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-fleek-yellow text-fleek-black font-bold rounded-lg hover:bg-fleek-yellow-dark transition-colors"
             >
               <RefreshCw className="w-4 h-4" />
               Retry
@@ -137,19 +137,19 @@ export const Dashboard: React.FC = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-6">
           {/* Vendor Info Banner */}
-          <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+          <div className="bg-fleek-black rounded-xl p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-blue-900">
-                  Viewing data for: <span className="font-semibold">{vendorHandle}</span>
+                <p className="text-sm font-semibold text-white">
+                  Viewing data for: <span className="text-fleek-yellow">{vendorHandle}</span>
                 </p>
-                <p className="text-xs text-blue-700 mt-1">
+                <p className="text-xs text-gray-400 mt-1">
                   Data source: {import.meta.env.VITE_USE_BIGQUERY === 'true' ? 'BigQuery (Live)' : 'Sample Data'}
                 </p>
               </div>
               <button
                 onClick={handleRefresh}
-                className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-blue-200 text-blue-700 rounded-lg hover:bg-blue-50 transition-colors text-sm"
+                className="inline-flex items-center gap-2 px-3 py-1.5 bg-fleek-yellow text-fleek-black font-bold rounded-lg hover:bg-fleek-yellow-dark transition-colors text-sm"
               >
                 <RefreshCw className="w-4 h-4" />
                 Refresh
@@ -161,14 +161,14 @@ export const Dashboard: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <button
               onClick={() => navigate('/orders')}
-              className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow text-left"
+              className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md hover:border-fleek-yellow transition-all text-left group"
             >
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
-                  <Package className="w-6 h-6 text-blue-600" />
+                <div className="w-12 h-12 bg-fleek-yellow rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <Package className="w-6 h-6 text-fleek-black" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">View All Orders</h3>
+                  <h3 className="text-base font-bold text-fleek-black">View All Orders</h3>
                   <p className="text-sm text-gray-500">Manage and track your orders</p>
                 </div>
               </div>
@@ -176,14 +176,14 @@ export const Dashboard: React.FC = () => {
 
             <button
               onClick={() => navigate('/income-statement')}
-              className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow text-left"
+              className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md hover:border-fleek-yellow transition-all text-left group"
             >
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-emerald-50 rounded-lg flex items-center justify-center">
-                  <DollarSign className="w-6 h-6 text-emerald-600" />
+                <div className="w-12 h-12 bg-fleek-black rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <DollarSign className="w-6 h-6 text-fleek-yellow" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Income Statement</h3>
+                  <h3 className="text-base font-bold text-fleek-black">Income Statement</h3>
                   <p className="text-sm text-gray-500">View financial overview</p>
                 </div>
               </div>
