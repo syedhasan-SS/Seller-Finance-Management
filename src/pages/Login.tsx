@@ -1,5 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface LoginResponse {
   token: string;
@@ -15,6 +16,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -37,9 +39,8 @@ export default function Login() {
 
       const data: LoginResponse = await response.json();
 
-      // Store token in localStorage
-      localStorage.setItem('auth_token', data.token);
-      localStorage.setItem('supplier_handle', data.supplier.handle);
+      // Update AuthContext state (also sets localStorage internally)
+      login(data.token, data.supplier.handle, '');
 
       // Redirect to dashboard
       navigate('/dashboard');
