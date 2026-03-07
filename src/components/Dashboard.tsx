@@ -134,57 +134,57 @@ export const Dashboard: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <Header sellerId={payoutData.sellerId} />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-6">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
+        <div className="space-y-4 sm:space-y-6">
           {/* Vendor Info Banner */}
-          <div className="bg-fleek-black rounded-xl p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold text-white">
-                  Viewing data for: <span className="text-fleek-yellow">{vendorHandle}</span>
+          <div className="bg-fleek-black rounded-xl p-3 sm:p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm font-semibold text-white truncate">
+                  Viewing: <span className="text-fleek-yellow">{vendorHandle}</span>
                 </p>
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-xs text-gray-400 mt-0.5 hidden sm:block">
                   Data source: {import.meta.env.VITE_USE_BIGQUERY === 'true' ? 'BigQuery (Live)' : 'Sample Data'}
                 </p>
               </div>
               <button
                 onClick={handleRefresh}
-                className="inline-flex items-center gap-2 px-3 py-1.5 bg-fleek-yellow text-fleek-black font-bold rounded-lg hover:bg-fleek-yellow-dark transition-colors text-sm"
+                className="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 bg-fleek-yellow text-fleek-black font-bold rounded-lg hover:bg-fleek-yellow-dark transition-colors text-xs sm:text-sm"
               >
-                <RefreshCw className="w-4 h-4" />
+                <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 Refresh
               </button>
             </div>
           </div>
 
-          {/* Quick Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Quick Actions — side by side on all sizes */}
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
             <button
               onClick={() => navigate('/orders')}
-              className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md hover:border-fleek-yellow transition-all text-left group"
+              className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-md hover:border-fleek-yellow transition-all text-left group"
             >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-fleek-yellow rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
-                  <Package className="w-6 h-6 text-fleek-black" />
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 bg-fleek-yellow rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                  <Package className="w-5 h-5 sm:w-6 sm:h-6 text-fleek-black" />
                 </div>
-                <div>
-                  <h3 className="text-base font-bold text-fleek-black">View All Orders</h3>
-                  <p className="text-sm text-gray-500">Manage and track your orders</p>
+                <div className="min-w-0">
+                  <h3 className="text-sm sm:text-base font-bold text-fleek-black leading-tight">View Orders</h3>
+                  <p className="text-xs text-gray-500 hidden sm:block mt-0.5">Manage and track your orders</p>
                 </div>
               </div>
             </button>
 
             <button
               onClick={() => navigate('/income-statement')}
-              className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md hover:border-fleek-yellow transition-all text-left group"
+              className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-md hover:border-fleek-yellow transition-all text-left group"
             >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-fleek-black rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
-                  <DollarSign className="w-6 h-6 text-fleek-yellow" />
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 bg-fleek-black rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                  <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-fleek-yellow" />
                 </div>
-                <div>
-                  <h3 className="text-base font-bold text-fleek-black">Income Statement</h3>
-                  <p className="text-sm text-gray-500">View financial overview</p>
+                <div className="min-w-0">
+                  <h3 className="text-sm sm:text-base font-bold text-fleek-black leading-tight">Income</h3>
+                  <p className="text-xs text-gray-500 hidden sm:block mt-0.5">View financial overview</p>
                 </div>
               </div>
             </button>
@@ -192,11 +192,11 @@ export const Dashboard: React.FC = () => {
 
           <PayoutTimeline data={payoutData} />
 
-          <div className="grid lg:grid-cols-3 gap-6">
+          <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
             <div className="lg:col-span-2">
               <OrdersTable orders={payoutData.orders} onOrderClick={handleOrderClick} />
             </div>
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <ActiveBlockers blockers={payoutData.activeBlockers} />
             </div>
           </div>
