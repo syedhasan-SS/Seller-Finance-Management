@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Info } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Header from './Header';
 import { useSeller } from '../contexts/SellerContext';
@@ -95,22 +95,12 @@ export const IncomeStatement: React.FC = () => {
           </nav>
         </div>
 
-        {/* Info Banner */}
-        <div className="bg-fleek-yellow-light border border-fleek-yellow rounded-lg p-4 mb-6 flex items-start gap-3">
-          <Info className="w-5 h-5 text-fleek-black mt-0.5 flex-shrink-0" />
-          <p className="text-sm text-fleek-black">
-            Dear Seller, please note that there may be a system delay affecting the automated updates of your seller statement.
-            If you notice that your statement is not up to date, kindly reach out to our Partner Support Team for assistance.{' '}
-            <a href="#" className="font-bold underline hover:opacity-70 transition-opacity">Contact PSC</a>
-          </p>
-        </div>
 
         {/* View Statements Section */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100">
           <div className="px-6 py-5 border-b border-gray-100">
             <div className="flex items-center gap-2 mb-6">
               <h2 className="text-xl font-bold text-fleek-black">View Statements</h2>
-              <Info className="w-4 h-4 text-gray-400" />
             </div>
 
             {/* Filters */}
