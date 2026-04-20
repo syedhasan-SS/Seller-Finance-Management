@@ -21,10 +21,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const sql = `
-      SELECT id
-      FROM \`dogwood-baton-345622.aurora_postgres_public.vendors\`
-      WHERE handle = '${handle}'
-        AND _fivetran_deleted = FALSE
+      SELECT CAST(vendor_id AS STRING) AS id
+      FROM \`dogwood-baton-345622.fleek_analytics.vendor_payout\`
+      WHERE vendor = '${handle}'
       LIMIT 1
     `;
 

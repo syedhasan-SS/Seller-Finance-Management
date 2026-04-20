@@ -42,9 +42,10 @@ export function SellerProvider({ children }: SellerProviderProps) {
         return;
       }
 
-      // Option 2: Get from auth (set by AuthContext after login)
+      // Option 2: Get from auth (only for vendor role, not admin/owner/viewer)
       const authHandle = localStorage.getItem('supplier_handle');
-      if (authHandle) {
+      const authRole = localStorage.getItem('user_role');
+      if (authHandle && authRole === 'vendor') {
         console.log('[SellerContext] Using auth handle:', authHandle);
         setVendorHandle(authHandle);
         setSellerId(authHandle);

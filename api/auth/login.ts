@@ -112,10 +112,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.log(`[Login] Vendor login attempt for handle: ${safeHandle}`);
 
     const sql = `
-      SELECT id, handle
-      FROM \`dogwood-baton-345622.aurora_postgres_public.vendors\`
-      WHERE handle = '${safeHandle}'
-        AND _fivetran_deleted = FALSE
+      SELECT CAST(vendor_id AS STRING) AS id, vendor AS handle
+      FROM \`dogwood-baton-345622.fleek_analytics.vendor_payout\`
+      WHERE vendor = '${safeHandle}'
       LIMIT 1
     `;
 
