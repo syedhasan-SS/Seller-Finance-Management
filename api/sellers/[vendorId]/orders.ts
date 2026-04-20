@@ -2,10 +2,10 @@
  * Seller Orders Endpoint
  *
  * GET /api/sellers/:vendorId/orders
- * Returns seller's orders with all 14 financial fields
+ * Returns seller's orders from fleek_analytics.vendor_payout
  *
  * Query params:
- * - status: Filter by payout status (optional)
+ * - status: Filter by latest_status (optional)
  * - search: Search by order number, internal ID, or product name (optional)
  * - limit: Number of results to return (default: 100)
  * - offset: Pagination offset (default: 0)
@@ -35,6 +35,8 @@ interface OrderRow {
   total_paid_amount: number;
   qc_status: string;
   ff_status: string;
+  to_be_paid: string;
+  payment_trigger: string;
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -46,59 +48,53 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'Vendor ID is required' });
     }
 
-    // Build WHERE clause with filters
-    let whereClause = `
-      WHERE CAST(bt.destination_id AS INT64) = ${vendorId}
-        AND bt._fivetran_deleted = FALSE
-        AND bt.status IN ('in_progress', 'completed', 'eligible', 'pending_eligibility', 'held', 'paid')
-    `;
+    let whereClause = `WHERE vendor_id = ${parseInt(vendorId, 10)}`;
 
     if (status && status !== 'all') {
-      whereClause += ` AND bt.status = '${status}'`;
+      whereClause += ` AND latest_status = '${status}'`;
     }
 
     if (search && typeof search === 'string') {
       whereClause += ` AND (
-        CAST(vp.order_number AS STRING) LIKE '%${search}%'
-        OR vp.internal_order_id LIKE '%${search}%'
-        OR vp.title LIKE '%${search}%'
+        CAST(order_number AS STRING) LIKE '%${search}%'
+        OR internal_order_id LIKE '%${search}%'
+        OR title LIKE '%${search}%'
       )`;
     }
 
     const sql = `
       SELECT
-        CAST(bt.order_line_id AS STRING) AS order_id,
-        vp.order_number,
-        vp.internal_order_id,
-        vp.title AS product_name,
-        vp.vendor,
-        vp.vendor_id,
-        bt.created_at,
-        vp.latest_status,
-        bt.status AS payout_status,
-        vp.includesShipping,
-        bt.final_base_smallest_unit / 100.0 AS original_final_base,
-        bt.commission_percentage,
-        (bt.final_base_smallest_unit / 100.0) * (bt.commission_percentage / 100.0) AS original_commission,
-        (bt.final_base_smallest_unit / 100.0) * (1 - (bt.commission_percentage / 100.0)) AS base_after_commission,
-        bt.shipping_amount_smallest_unit / 100.0 AS vendor_shipping_cost,
-        bt.refund_amount_smallest_unit / 100.0 AS supplier_refund,
-        bt.cancellation_fee_smallest_unit / 100.0 AS cancellation_fee,
-        bt.total_payable_smallest_unit / 100.0 AS total_paid_amount,
-        vp.qc_status,
-        vp.ff_status
-      FROM \`dogwood-baton-345622.aurora_postgres_public.balance_transaction\` bt
-      LEFT JOIN \`dogwood-baton-345622.fleek_analytics.vendor_payout\` vp
-        ON bt.order_line_id = CAST(vp.order_line_id AS STRING)
+        CAST(order_line_id AS STRING) AS order_id,
+        order_number,
+        internal_order_id,
+        title AS product_name,
+        vendor,
+        vendor_id,
+        created_at,
+        latest_status,
+        latest_status AS payout_status,
+        includesShipping,
+        COALESCE(vbp_gbp, 0) AS original_final_base,
+        COALESCE(CAST(commission_perc AS FLOAT64), 0) AS commission_percentage,
+        COALESCE(commission, 0) AS original_commission,
+        COALESCE(final_base, 0) AS base_after_commission,
+        COALESCE(vendor_shipping_cost_gbp, 0) AS vendor_shipping_cost,
+        COALESCE(supplier_impact, 0) AS supplier_refund,
+        COALESCE(cancellation_fee_amount, 0) AS cancellation_fee,
+        COALESCE(total_payable_product_cost_gbp, 0) AS total_paid_amount,
+        COALESCE(qc_status, '') AS qc_status,
+        COALESCE(ff_status, '') AS ff_status,
+        COALESCE(to_be_paid, '') AS to_be_paid,
+        COALESCE(payment_trigger, '') AS payment_trigger
+      FROM \`dogwood-baton-345622.fleek_analytics.vendor_payout\`
       ${whereClause}
-      ORDER BY bt.created_at DESC
-      LIMIT ${limit}
-      OFFSET ${offset}
+      ORDER BY created_at DESC
+      LIMIT ${parseInt(limit as string, 10)}
+      OFFSET ${parseInt(offset as string, 10)}
     `;
 
     const results = await executeQuery<OrderRow>(sql);
 
-    // Map to Order objects with proper field names
     const orders = results.map(row => ({
       orderId: row.order_id,
       orderNumber: row.order_number,
@@ -118,14 +114,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       cancellationFee: row.cancellation_fee,
       totalPaidAmount: row.total_paid_amount,
       includesShipping: row.includesShipping || false,
-      // Legacy/convenience fields for backward compatibility
       completedAt: row.created_at,
       status: row.payout_status,
       amount: row.total_paid_amount,
       qcStatus: row.qc_status,
       ffStatus: row.ff_status,
-      eligibilityDate: null, // Could calculate based on qc_time/ff_time
-      holdReasons: [], // Could determine from qc_status/ff_status
+      toBePaid: row.to_be_paid,
+      paymentTrigger: row.payment_trigger,
+      eligibilityDate: null,
+      holdReasons: [],
     }));
 
     res.json(orders);
