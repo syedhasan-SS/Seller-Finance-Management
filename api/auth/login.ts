@@ -111,38 +111,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     console.log(`[Login] Vendor login attempt for handle: ${safeHandle}`);
 
-    const sql = `
-      SELECT CAST(vendor_id AS STRING) AS id, vendor AS handle
-      FROM \`dogwood-baton-345622.fleek_analytics.vendor_payout\`
-      WHERE vendor = '${safeHandle}'
-      LIMIT 1
-    `;
+    // Pilot mode: accept any valid handle, no DB lookup required
+    const token = generateToken(safeHandle, '', safeHandle, 'vendor');
 
-    const results = await executeQuery<Vendor>(sql);
-
-    if (results.length === 0) {
-      console.log(`[Login] Vendor not found: ${safeHandle}`);
-      return res.status(401).json({
-        error: 'Authentication failed',
-        message: 'Invalid handle or password',
-      });
-    }
-
-    const vendor = results[0];
-
-    // Pilot mode: accept any password for vendors
-    // TODO: Implement bcrypt check against a dedicated vendors auth table
-    const token = generateToken(vendor.id, '', vendor.handle, 'vendor');
-
-    console.log(`[Login] Vendor login success: ${vendor.handle} (${vendor.id})`);
+    console.log(`[Login] Vendor login success (pilot mode): ${safeHandle}`);
 
     return res.json({
       token,
       user: {
-        id: vendor.id,
-        name: vendor.handle,
+        id: safeHandle,
+        name: safeHandle,
         email: '',
-        handle: vendor.handle,
+        handle: safeHandle,
         role: 'vendor' as UserRole,
       },
     });
