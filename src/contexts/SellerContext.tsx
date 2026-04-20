@@ -42,7 +42,16 @@ export function SellerProvider({ children }: SellerProviderProps) {
         return;
       }
 
-      // Option 2: Get from environment or use hardcoded fallback (for development)
+      // Option 2: Get from auth (set by AuthContext after login)
+      const authHandle = localStorage.getItem('supplier_handle');
+      if (authHandle) {
+        console.log('[SellerContext] Using auth handle:', authHandle);
+        setVendorHandle(authHandle);
+        setSellerId(authHandle);
+        return;
+      }
+
+      // Option 3: Get from environment or use hardcoded fallback (for development)
       const defaultVendor = import.meta.env.VITE_DEFAULT_VENDOR || 'vibe-vintage';
       if (defaultVendor) {
         console.log('[SellerContext] Using default vendor:', defaultVendor);
@@ -51,7 +60,7 @@ export function SellerProvider({ children }: SellerProviderProps) {
         return;
       }
 
-      // Option 3: Get from localStorage (for persistence across sessions)
+      // Option 4: Get from localStorage (for persistence across sessions)
       const storedVendor = localStorage.getItem('selectedVendor');
       if (storedVendor) {
         console.log('[SellerContext] Found vendor in localStorage:', storedVendor);

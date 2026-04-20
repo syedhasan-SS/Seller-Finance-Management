@@ -84,6 +84,16 @@ export async function getSellerOrders(
 }
 
 /**
+ * Get income statements for a vendor
+ */
+export async function getSellerStatements(vendorId: string): Promise<any[]> {
+  const response = await fetch(`${API_URL}/api/sellers/${vendorId}/statements`, {
+    headers: getAuthHeaders(),
+  });
+  return handleResponse(response);
+}
+
+/**
  * Get complete payout data for Dashboard
  */
 export async function getSellerPayoutData(vendorId: string): Promise<PayoutData> {
@@ -93,8 +103,11 @@ export async function getSellerPayoutData(vendorId: string): Promise<PayoutData>
 
   const data = await handleResponse(response);
 
-  // Get recent orders for the dashboard
-  const orders = await getSellerOrders(vendorId, { limit: 10 });
+  // Get upcoming payout orders for the dashboard (eligible + in_progress + pending_eligibility + held)
+  const allOrders = await getSellerOrders(vendorId, { limit: 50 });
+  const orders = allOrders.filter(o =>
+    ['eligible', 'in_progress', 'pending_eligibility', 'held'].includes(o.latestStatus)
+  ).slice(0, 20);
 
   return {
     ...data,

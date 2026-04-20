@@ -12,7 +12,7 @@ export default function OrdersTable({ orders, onOrderClick }: OrdersTableProps) 
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
-  const getStatusConfig = (status: Order['status']) => {
+  const getStatusConfig = (status: string) => {
     switch (status) {
       case 'eligible':
         return { icon: CheckCircle, label: 'Eligible', className: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
@@ -20,11 +20,18 @@ export default function OrdersTable({ orders, onOrderClick }: OrdersTableProps) 
         return { icon: AlertCircle, label: 'Pending', className: 'bg-amber-50 text-amber-700 border-amber-200' };
       case 'held':
         return { icon: AlertCircle, label: 'Held', className: 'bg-red-50 text-red-700 border-red-200' };
+      case 'in_progress':
+        return { icon: CheckCircle, label: 'In Progress', className: 'bg-blue-50 text-blue-700 border-blue-200' };
+      case 'paid':
+        return { icon: CheckCircle, label: 'Paid', className: 'bg-gray-50 text-gray-600 border-gray-200' };
+      default:
+        return { icon: AlertCircle, label: status || 'Unknown', className: 'bg-gray-50 text-gray-600 border-gray-200' };
     }
   };
 
   const getDetailsText = (order: Order) => {
-    if (order.status === 'pending_eligibility' && order.daysUntilEligible) {
+    const status = order.latestStatus || order.status;
+    if (status === 'pending_eligibility' && order.daysUntilEligible) {
       return `Eligible in ${order.daysUntilEligible} days`;
     }
     if (order.holdReasons?.length) {
@@ -45,7 +52,7 @@ export default function OrdersTable({ orders, onOrderClick }: OrdersTableProps) 
       {/* ── Mobile card view (hidden on md+) ─────────────────────────────── */}
       <div className="md:hidden divide-y divide-gray-100">
         {orders.map((order) => {
-          const statusConfig = getStatusConfig(order.status);
+          const statusConfig = getStatusConfig(order.latestStatus || order.status);
           const StatusIcon = statusConfig.icon;
           const detailsText = getDetailsText(order);
 
@@ -123,7 +130,7 @@ export default function OrdersTable({ orders, onOrderClick }: OrdersTableProps) 
           </thead>
           <tbody className="bg-white divide-y divide-gray-50">
             {orders.map((order) => {
-              const statusConfig = getStatusConfig(order.status);
+              const statusConfig = getStatusConfig(order.latestStatus || order.status);
               const StatusIcon = statusConfig.icon;
               return (
                 <tr
