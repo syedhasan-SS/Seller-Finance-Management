@@ -30,6 +30,10 @@ export interface Order {
   // Shipping flag
   includesShipping: boolean; // includesShipping (REQUIRED per user spec)
 
+  // Discount fields (optional — only present when a discount/offer was applied)
+  discount?: number; // Discount (£) from promo codes
+  makeAnOffer?: number; // Make An Offer (£) from buyer offers
+
   // Legacy/convenience fields (backward compatibility)
   status: 'eligible' | 'pending_eligibility' | 'held' | 'paid'; // alias for payoutStatus
   amount: number; // alias for totalPaidAmount

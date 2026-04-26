@@ -13,6 +13,7 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { executeQuery } from '../../_lib/bigquery';
+import { CREED_ORDERS } from '../../_lib/creed-static-data';
 
 interface OrderRow {
   order_id: string;
@@ -33,6 +34,8 @@ interface OrderRow {
   supplier_refund: number;
   cancellation_fee: number;
   total_paid_amount: number;
+  discount: number;
+  make_an_offer: number;
   qc_status: string;
   ff_status: string;
   to_be_paid: string;
@@ -46,6 +49,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (!vendorId || typeof vendorId !== 'string') {
       return res.status(400).json({ error: 'Vendor ID is required' });
+    }
+
+    // Static data for creed-vintage (vendor_id 259)
+    if (vendorId === '259' || vendorId === 'creed-vintage') {
+      let orders = CREED_ORDERS;
+
+      if (status && status !== 'all') {
+        orders = orders.filter(o => o.latestStatus === status);
+      }
+      if (search && typeof search === 'string') {
+        const s = search.toLowerCase();
+        orders = orders.filter(o =>
+          String(o.orderNumber).includes(s) ||
+          o.internalOrderId.toLowerCase().includes(s) ||
+          o.productName.toLowerCase().includes(s)
+        );
+      }
+      const lim = parseInt(limit as string, 10) || 100;
+      const off = parseInt(offset as string, 10) || 0;
+      return res.json(orders.slice(off, off + lim));
     }
 
     let whereClause = `WHERE vendor_id = ${parseInt(vendorId, 10)}`;
@@ -82,6 +105,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         COALESCE(supplier_impact, 0) AS supplier_refund,
         COALESCE(cancellation_fee_amount, 0) AS cancellation_fee,
         COALESCE(total_payable_product_cost_gbp, 0) AS total_paid_amount,
+        COALESCE(discount_amount, 0) AS discount,
+        COALESCE(make_an_offer_amount, 0) AS make_an_offer,
         COALESCE(qc_status, '') AS qc_status,
         COALESCE(ff_status, '') AS ff_status,
         COALESCE(to_be_paid, '') AS to_be_paid,
@@ -114,6 +139,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       cancellationFee: row.cancellation_fee,
       totalPaidAmount: row.total_paid_amount,
       includesShipping: row.includesShipping || false,
+      discount: row.discount || 0,
+      makeAnOffer: row.make_an_offer || 0,
       completedAt: row.created_at,
       status: row.payout_status,
       amount: row.total_paid_amount,

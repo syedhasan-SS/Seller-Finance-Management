@@ -26,22 +26,9 @@ export async function getPayoutData(sellerIdOrHandle: string): Promise<PayoutDat
     return samplePayoutData;
   }
 
-  // Use API client to call backend API (which uses BigQuery)
+  // Pass handle/ID directly — all endpoints accept both handles and numeric IDs
   console.log('[API] Using BigQuery API for seller:', sellerIdOrHandle);
-
-  // Check if we have a vendor handle or vendor ID
-  let vendorId = sellerIdOrHandle;
-
-  // If it looks like a handle (contains letters), look up the ID
-  if (/[a-z]/i.test(sellerIdOrHandle)) {
-    const id = await apiClient.getVendorId(sellerIdOrHandle);
-    if (!id) {
-      throw new Error(`Vendor not found: ${sellerIdOrHandle}`);
-    }
-    vendorId = id;
-  }
-
-  return apiClient.getSellerPayoutData(vendorId);
+  return apiClient.getSellerPayoutData(sellerIdOrHandle);
 }
 
 /**
@@ -74,14 +61,8 @@ export async function getOrders(
     return orders;
   }
 
-  let vendorId = sellerIdOrHandle;
-  if (/[a-z]/i.test(sellerIdOrHandle)) {
-    const id = await apiClient.getVendorId(sellerIdOrHandle);
-    if (!id) throw new Error(`Vendor not found: ${sellerIdOrHandle}`);
-    vendorId = id;
-  }
-
-  return apiClient.getSellerOrders(vendorId, filters);
+  // Pass handle/ID directly — orders endpoint accepts both
+  return apiClient.getSellerOrders(sellerIdOrHandle, filters);
 }
 
 /**

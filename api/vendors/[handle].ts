@@ -20,6 +20,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'Vendor handle is required' });
     }
 
+    // Static vendor ID for creed-vintage (BigQuery view inaccessible)
+    if (handle === 'creed-vintage') {
+      return res.json({ id: '259' });
+    }
+
     const sql = `
       SELECT CAST(vendor_id AS STRING) AS id
       FROM \`dogwood-baton-345622.fleek_analytics.vendor_payout\`

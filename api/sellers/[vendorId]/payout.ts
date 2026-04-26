@@ -7,6 +7,7 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { executeQuery } from '../../_lib/bigquery';
+import { CREED_PAYOUT_DATA } from '../../_lib/creed-static-data';
 
 interface UpcomingPayoutRow {
   eligible_order_count: number;
@@ -28,6 +29,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (!vendorId || typeof vendorId !== 'string') {
       return res.status(400).json({ error: 'Vendor ID is required' });
+    }
+
+    // Static data for creed-vintage (vendor_id 259)
+    if (vendorId === '259' || vendorId === 'creed-vintage') {
+      return res.json({ ...CREED_PAYOUT_DATA, sellerId: vendorId });
     }
 
     const vid = parseInt(vendorId, 10);

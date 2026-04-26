@@ -1,80 +1,75 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Download, Search, Info, Copy } from 'lucide-react';
+import { ArrowLeft, Download, ExternalLink } from 'lucide-react';
 import Header from './Header';
+import { useSeller } from '../contexts/SellerContext';
+import { getSellerStatements } from '../services/api-client';
+import { LoadingSpinner } from './LoadingSpinner';
 
-// Sample statement detail data
-const statementData = {
-  'PK2NBY8TW72-2026-008': {
-    id: 'PK2NBY8TW72-2026-008',
-    amount: 110.18,
-    period: '16 Feb 2026 - 22 Feb 2026',
-    status: 'Ready to Release',
-    expectedPayoutDate: '',
-    openingBalance: 0.00,
-    deliveredOrders: {
-      subtotal: 367.70,
-      items: [
-        { name: 'Income Tax Withholding', amount: -4.00 },
-        { name: 'Co-funded Voucher Max', amount: -4.30 },
-        { name: 'Sales Tax Withholding', amount: -4.00 },
-        { name: 'Shipping Fee Paid by Buyer', amount: 165.00 },
-        { name: 'Product Price Paid by Buyer', amount: 215.00 }
-      ]
-    },
-    transactionFees: {
-      subtotal: 246.02,
-      items: [
-        { name: 'Commission Fee', amount: -35.86 },
-        { name: 'Payment Fee', amount: -5.57 },
-        { name: 'Free Shipping Max Fee', amount: -14.84 },
-        { name: 'Shipping Fee', amount: -189.75 }
-      ]
-    },
-    logistics: {
-      subtotal: -11.50,
-      items: [
-        { name: 'Handling Fee', amount: -11.50 }
-      ]
-    },
-    closingBalance: 110.18,
-    orders: [
-      {
-        id: '23643481474807',
-        lineId: 'ID:23643481474807',
-        product: 'Rivaj Mahal Hair Oil – Herbal Hair Oil',
-        image: '/placeholder-product.jpg',
-        creationDate: '11 Feb 2026 10:18',
-        status: 'Ready to Release',
-        amount: 110.18
-      }
-    ]
-  }
-};
+interface Statement {
+  id: string;
+  period: string;
+  releasedAmount: number;
+  status: string;
+  expectedPayoutDate: string;
+  pdfUrl?: string | null;
+}
 
 export const StatementDetail: React.FC = () => {
   const navigate = useNavigate();
   const { statementId } = useParams<{ statementId: string }>();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [feeFilter, setFeeFilter] = useState('all');
+  const { sellerId, vendorHandle } = useSeller();
+  const [statement, setStatement] = useState<Statement | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const statement = statementId ? statementData[statementId as keyof typeof statementData] : null;
+  useEffect(() => {
+    if (statementId && (sellerId || vendorHandle)) {
+      loadStatement();
+    }
+  }, [statementId, sellerId, vendorHandle]);
 
-  const handleBack = () => {
-    navigate('/income-statement');
-  };
+  async function loadStatement() {
+    try {
+      setLoading(true);
+      setError(null);
+      const id = vendorHandle || sellerId || '';
+      const statements: Statement[] = await getSellerStatements(id);
+      const found = statements.find(s => s.id === statementId);
+      if (!found) {
+        setError('Statement not found');
+      } else {
+        setStatement(found);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to load statement');
+    } finally {
+      setLoading(false);
+    }
+  }
 
-  if (!statement) {
+  const handleBack = () => navigate('/income-statement');
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  if (error || !statement) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header sellerId="SEL-789" />
+        <Header sellerId={sellerId || vendorHandle || ''} />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Statement Not Found</h2>
-            <button
-              onClick={handleBack}
-              className="text-blue-600 hover:text-blue-700 font-medium"
-            >
+          <button onClick={handleBack} className="flex items-center gap-2 text-gray-600 hover:text-fleek-black mb-6 font-medium transition-colors">
+            <ArrowLeft className="w-4 h-4" />
+            Back to My Income
+          </button>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-10 text-center">
+            <p className="text-gray-500 text-sm mb-4">{error || 'Statement not found'}</p>
+            <button onClick={handleBack} className="text-sm font-bold text-fleek-black underline underline-offset-2">
               Back to Income Statement
             </button>
           </div>
@@ -85,306 +80,134 @@ export const StatementDetail: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header sellerId="SEL-789" />
+      <Header sellerId={sellerId || vendorHandle || ''} />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-gray-600 mb-6">
-          <button onClick={() => navigate('/dashboard')} className="hover:text-gray-900">
-            Home
-          </button>
+        <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
+          <button onClick={() => navigate('/dashboard')} className="hover:text-fleek-black transition-colors">Home</button>
           <span>/</span>
-          <button onClick={handleBack} className="hover:text-gray-900">
-            My Income
-          </button>
+          <button onClick={handleBack} className="hover:text-fleek-black transition-colors">My Income</button>
           <span>/</span>
-          <span className="text-gray-900 font-medium">Statement Detail</span>
+          <span className="text-fleek-black font-semibold">Statement Detail</span>
         </div>
 
-        {/* Page Title */}
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Statement Detail</h1>
+        <h1 className="text-3xl font-extrabold text-fleek-black tracking-tight mb-8">Statement Detail</h1>
 
         {/* Statement Overview */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
           <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2">
-              <h2 className="text-xl font-semibold text-gray-900">Statement Overview</h2>
-              <Info className="w-4 h-4 text-gray-400" />
-            </div>
-            <button className="flex items-center gap-2 px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 transition-colors">
-              <Download className="w-4 h-4" />
-              <span className="text-sm font-medium">Download</span>
-            </button>
+            <h2 className="text-xl font-bold text-fleek-black">Statement Overview</h2>
+            {statement.pdfUrl ? (
+              <a
+                href={statement.pdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-fleek-yellow text-fleek-black font-bold rounded-lg hover:bg-fleek-yellow-dark transition-colors text-sm"
+              >
+                <Download className="w-4 h-4" />
+                Download PDF
+                <ExternalLink className="w-3 h-3 opacity-60" />
+              </a>
+            ) : (
+              <button
+                disabled
+                className="inline-flex items-center gap-2 px-4 py-2 border-2 border-gray-200 text-gray-400 font-bold rounded-lg text-sm cursor-not-allowed"
+              >
+                <Download className="w-4 h-4" />
+                Download PDF
+              </button>
+            )}
           </div>
 
-          {/* Amount Display */}
+          {/* Amount */}
           <div className="mb-6">
-            <h3 className="text-4xl font-bold text-blue-600 mb-4">PKR {statement.amount.toFixed(2)}</h3>
-            <div className="grid grid-cols-4 gap-4 text-sm">
-              <div>
-                <span className="text-gray-600">Statement Number: </span>
-                <span className="font-medium text-gray-900">{statement.id}</span>
-              </div>
-              <div>
-                <span className="text-gray-600">Statement Period: </span>
-                <span className="font-medium text-gray-900">{statement.period}</span>
-              </div>
-              <div>
-                <span className="text-gray-600">Statement Status: </span>
-                <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
-                  statement.status === 'Released'
-                    ? 'bg-emerald-50 text-emerald-700'
-                    : 'bg-amber-50 text-amber-700'
-                }`}>
-                  {statement.status}
-                </span>
-              </div>
-              <div>
-                <span className="text-gray-600">Expected Payout Date: </span>
-                <span className="font-medium text-gray-900">{statement.expectedPayoutDate || '-'}</span>
-              </div>
-            </div>
+            <p className="text-4xl font-extrabold text-fleek-black mb-1">
+              £{statement.releasedAmount.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+            <p className="text-xs text-gray-400 uppercase tracking-wide">Released Amount (GBP)</p>
           </div>
 
-          {/* Fee Breakdown */}
-          <div className="space-y-4">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Fee Type</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Fee Name</th>
-                  <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Fee Amount (PKR)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {/* Opening Balance */}
-                <tr className="border-b border-gray-100">
-                  <td className="py-3 px-4 text-sm font-medium text-gray-900">Opening Balance</td>
-                  <td className="py-3 px-4"></td>
-                  <td className="py-3 px-4 text-sm text-right font-medium">PKR {statement.openingBalance.toFixed(2)}</td>
-                </tr>
-
-                {/* Delivered Orders */}
-                <tr className="bg-gray-50">
-                  <td className="py-3 px-4 text-sm font-medium text-gray-900" rowSpan={statement.deliveredOrders.items.length + 1}>
-                    Delivered Orders
-                  </td>
-                  <td className="py-3 px-4 text-sm text-gray-700">Subtotal</td>
-                  <td className="py-3 px-4 text-sm text-right font-medium">PKR {statement.deliveredOrders.subtotal.toFixed(2)}</td>
-                </tr>
-                {statement.deliveredOrders.items.map((item, idx) => (
-                  <tr key={idx} className="border-b border-gray-100">
-                    <td className="py-3 px-4 text-sm text-gray-700 pl-8">{item.name}</td>
-                    <td className="py-3 px-4 text-sm text-right font-medium">PKR {item.amount.toFixed(2)}</td>
-                  </tr>
-                ))}
-
-                {/* Transaction Fees */}
-                <tr className="bg-gray-50">
-                  <td className="py-3 px-4 text-sm font-medium text-gray-900" rowSpan={statement.transactionFees.items.length + 1}>
-                    Transaction Fees
-                  </td>
-                  <td className="py-3 px-4 text-sm text-gray-700">Subtotal</td>
-                  <td className="py-3 px-4 text-sm text-right font-medium">PKR {statement.transactionFees.subtotal.toFixed(2)}</td>
-                </tr>
-                {statement.transactionFees.items.map((item, idx) => (
-                  <tr key={idx} className="border-b border-gray-100">
-                    <td className="py-3 px-4 text-sm text-gray-700 pl-8">{item.name}</td>
-                    <td className="py-3 px-4 text-sm text-right font-medium">PKR {item.amount.toFixed(2)}</td>
-                  </tr>
-                ))}
-
-                {/* Logistics */}
-                <tr className="bg-gray-50">
-                  <td className="py-3 px-4 text-sm font-medium text-gray-900" rowSpan={statement.logistics.items.length + 1}>
-                    Logistics & Fulfillment Services
-                  </td>
-                  <td className="py-3 px-4 text-sm text-gray-700">Subtotal</td>
-                  <td className="py-3 px-4 text-sm text-right font-medium">PKR {statement.logistics.subtotal.toFixed(2)}</td>
-                </tr>
-                {statement.logistics.items.map((item, idx) => (
-                  <tr key={idx} className="border-b border-gray-100">
-                    <td className="py-3 px-4 text-sm text-gray-700 pl-8">{item.name}</td>
-                    <td className="py-3 px-4 text-sm text-right font-medium">PKR {item.amount.toFixed(2)}</td>
-                  </tr>
-                ))}
-
-                {/* Closing Balance */}
-                <tr className="bg-blue-50 border-t-2 border-blue-200">
-                  <td className="py-4 px-4 text-base font-bold text-blue-900">Closing Balance</td>
-                  <td className="py-4 px-4"></td>
-                  <td className="py-4 px-4 text-base font-bold text-blue-900 text-right">PKR {statement.closingBalance.toFixed(2)}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Statement Detail Table */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-          <div className="px-6 py-5 border-b border-gray-100">
-            <div className="flex items-center gap-2 mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">Statement Detail</h2>
-              <Info className="w-4 h-4 text-gray-400" />
+          {/* Metadata grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-5 border-t border-gray-100">
+            <div>
+              <p className="text-xs text-gray-400 mb-1">Payout ID</p>
+              <p className="text-sm font-bold text-fleek-black">{statement.id}</p>
             </div>
-
-            {/* Filters */}
-            <div className="flex gap-4">
-              <div className="flex-1 max-w-xs">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Order No/Order ID
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full px-3 py-2 pr-10 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                </div>
-              </div>
-
-              <div className="flex-1 max-w-xs">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Fee Name
-                </label>
-                <select
-                  value={feeFilter}
-                  onChange={(e) => setFeeFilter(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="all">Please Select</option>
-                  <option value="commission">Commission Fee</option>
-                  <option value="shipping">Shipping Fee</option>
-                </select>
-              </div>
-
-              <div className="flex items-end">
-                <button
-                  onClick={() => {
-                    setSearchTerm('');
-                    setFeeFilter('all');
-                  }}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
-                >
-                  Reset
-                </button>
-              </div>
+            <div>
+              <p className="text-xs text-gray-400 mb-1">Payout Date</p>
+              <p className="text-sm font-bold text-fleek-black">{statement.period}</p>
             </div>
-          </div>
-
-          {/* Orders Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    Order Details
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    Order Creation Date
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    Release Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    Released Amount
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    Statement Number
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-100">
-                {statement.orders.map((order) => (
-                  <tr key={order.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center flex-shrink-0">
-                          <span className="text-2xl">📦</span>
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">{order.product}</div>
-                          <div className="text-xs text-gray-500 flex items-center gap-2 mt-1">
-                            <span>Order Number: {order.id}</span>
-                            <button className="text-blue-600 hover:text-blue-700">
-                              <Copy className="w-3 h-3" />
-                            </button>
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            <span>Order Line ID: {order.lineId}</span>
-                            <button className="text-blue-600 hover:text-blue-700 ml-1">
-                              <Copy className="w-3 h-3" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {order.creationDate}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
-                        order.status === 'Released'
-                          ? 'bg-emerald-50 text-emerald-700'
-                          : 'bg-amber-50 text-amber-700'
-                      }`}>
-                        {order.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">Amount</div>
-                      <button className="text-sm text-blue-600 hover:text-blue-700">
-                        Show Fee Details ▼
-                      </button>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">
-                      <div>PKR {order.amount.toFixed(2)}</div>
-                      <div className="text-xs text-gray-500">{statement.id}</div>
-                      <button className="text-blue-600 hover:text-blue-700">
-                        <Copy className="w-3 h-3" />
-                      </button>
-                    </td>
-                    <td className="px-6 py-4">
-                      <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
-                        View Order Details
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-700">Items per page:</span>
-              <select className="px-2 py-1 border border-gray-200 rounded text-sm">
-                <option>10</option>
-                <option>20</option>
-                <option>50</option>
-              </select>
+            <div>
+              <p className="text-xs text-gray-400 mb-1">Status</p>
+              <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold border ${
+                statement.status === 'Released'
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                  : 'bg-fleek-yellow-light text-fleek-black border-fleek-yellow'
+              }`}>
+                {statement.status}
+              </span>
             </div>
-
-            <div className="flex items-center gap-2">
-              <button className="px-3 py-1 text-sm text-gray-400 cursor-not-allowed">
-                &lt; Previous
-              </button>
-              <button className="px-3 py-1 text-sm bg-red-600 text-white rounded">
-                1
-              </button>
-              <button className="px-3 py-1 text-sm text-blue-600 hover:bg-gray-100 rounded">
-                Next &gt;
-              </button>
+            <div>
+              <p className="text-xs text-gray-400 mb-1">Expected Payout Date</p>
+              <p className="text-sm font-bold text-fleek-black">{statement.expectedPayoutDate || '—'}</p>
             </div>
           </div>
         </div>
+
+        {/* Payout Breakdown */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+          <div className="px-6 py-4 border-b border-gray-100">
+            <h2 className="text-xl font-bold text-fleek-black">Payout Summary</h2>
+          </div>
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-100">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Item</th>
+                <th className="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Amount (GBP)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="border-b border-gray-50">
+                <td className="px-6 py-4 text-sm text-gray-600">Gross Payout (before commission)</td>
+                <td className="px-6 py-4 text-sm font-medium text-fleek-black text-right">
+                  £{(statement.releasedAmount / 0.82).toFixed(2)}
+                </td>
+              </tr>
+              <tr className="border-b border-gray-50">
+                <td className="px-6 py-4 text-sm text-gray-600">Fleek Commission (18%)</td>
+                <td className="px-6 py-4 text-sm font-medium text-red-600 text-right">
+                  -£{(statement.releasedAmount / 0.82 * 0.18).toFixed(2)}
+                </td>
+              </tr>
+              <tr className="bg-fleek-yellow-light">
+                <td className="px-6 py-4 text-sm font-bold text-fleek-black">Net Payout to Vendor</td>
+                <td className="px-6 py-4 text-sm font-bold text-fleek-black text-right">
+                  £{statement.releasedAmount.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* PDF CTA */}
+        {statement.pdfUrl && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-bold text-fleek-black mb-0.5">Full Order Breakdown</p>
+              <p className="text-xs text-gray-500">View the detailed per-order breakdown in the payout PDF</p>
+            </div>
+            <a
+              href={statement.pdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-fleek-black text-white font-bold rounded-lg hover:bg-gray-800 transition-colors text-sm whitespace-nowrap"
+            >
+              Open PDF
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          </div>
+        )}
       </main>
     </div>
   );

@@ -1,4 +1,5 @@
-import { CheckCircle, AlertCircle } from 'lucide-react';
+import { CheckCircle, AlertCircle, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Order } from '../types';
 
 interface OrdersTableProps {
@@ -7,6 +8,8 @@ interface OrdersTableProps {
 }
 
 export default function OrdersTable({ orders, onOrderClick }: OrdersTableProps) {
+  const navigate = useNavigate();
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -50,7 +53,7 @@ export default function OrdersTable({ orders, onOrderClick }: OrdersTableProps) 
       </div>
 
       {/* ── Mobile card view (hidden on md+) ─────────────────────────────── */}
-      <div className="md:hidden divide-y divide-gray-100">
+      <div className="md:hidden divide-y divide-gray-100 max-h-96 overflow-y-auto">
         {orders.map((order) => {
           const statusConfig = getStatusConfig(order.latestStatus || order.status);
           const StatusIcon = statusConfig.icon;
@@ -115,7 +118,7 @@ export default function OrdersTable({ orders, onOrderClick }: OrdersTableProps) 
       </div>
 
       {/* ── Desktop table view (hidden on mobile) ────────────────────────── */}
-      <div className="hidden md:block overflow-x-auto">
+      <div className="hidden md:block overflow-x-auto max-h-96 overflow-y-auto">
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-100">
             <tr>
@@ -185,6 +188,17 @@ export default function OrdersTable({ orders, onOrderClick }: OrdersTableProps) 
             })}
           </tbody>
         </table>
+      </div>
+      {/* Footer */}
+      <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between bg-gray-50">
+        <span className="text-xs text-gray-400">{orders.length} orders shown</span>
+        <button
+          onClick={() => navigate('/orders')}
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-fleek-black hover:text-gray-600 transition-colors"
+        >
+          View All Orders
+          <ArrowRight className="w-4 h-4" />
+        </button>
       </div>
     </div>
   );
