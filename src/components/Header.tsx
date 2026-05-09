@@ -1,4 +1,5 @@
 import { User, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface HeaderProps {
@@ -7,6 +8,7 @@ interface HeaderProps {
 
 export default function Header({ sellerId }: HeaderProps) {
   const { logout, userName, role } = useAuth();
+  const navigate = useNavigate();
 
   const displayName = userName || sellerId;
 
@@ -33,8 +35,9 @@ export default function Header({ sellerId }: HeaderProps) {
             <div className="hidden xs:block w-px h-6 sm:h-8 bg-fleek-gray-700" />
 
             <button
+              onClick={() => navigate('/tools/seller-profile-manager')}
               className="p-1.5 sm:p-2 text-gray-400 hover:text-fleek-yellow hover:bg-fleek-gray-800 rounded-lg transition-colors"
-              title="Account"
+              title="Account Settings"
             >
               <User className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>

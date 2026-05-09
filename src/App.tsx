@@ -9,6 +9,7 @@ const Dashboard = lazy(() => import('@components/Dashboard'));
 const Orders = lazy(() => import('@components/Orders'));
 const IncomeStatement = lazy(() => import('@components/IncomeStatement'));
 const StatementDetail = lazy(() => import('@components/StatementDetail'));
+const SellerProfileManager = lazy(() => import('@components/SellerProfileManager'));
 
 const LoadingFallback = () => (
   <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -56,6 +57,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <StatementDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/tools/seller-profile-manager"
+                element={
+                  <ProtectedRoute>
+                    <SellerProfileManager />
                   </ProtectedRoute>
                 }
               />
