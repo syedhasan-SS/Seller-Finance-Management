@@ -32,3 +32,6 @@ service-account-key.json
 # Vercel
 .vercel
 .env*.local
+.claude/*
+!.claude/launch.json
+!.claude/settings.json

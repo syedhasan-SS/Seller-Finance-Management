@@ -1,0 +1,167 @@
+{
+  "tasks": [
+    {
+      "id": "tsk-bank-verification",
+      "title": "Submit your bank verification video",
+      "description": "Record a short video confirming your bank account details so we can verify and enable payouts.",
+      "urgency": "critical",
+      "icon": "CreditCard",
+      "ctaLabel": "Submit verification video",
+      "ctaHref": "/tools/seller-profile-manager?tab=bank",
+      "estimatedMinutes": 5,
+      "conditions": { "bankStatuses": ["none", "submitted", "rejected"] },
+      "enabled": true,
+      "createdAt": "2026-06-21T00:00:00.000Z",
+      "updatedAt": "2026-06-21T00:00:00.000Z"
+    },
+    {
+      "id": "tsk-first-listing",
+      "title": "Create your first listing",
+      "description": "Upload at least one product so buyers can discover your shop.",
+      "urgency": "high",
+      "icon": "Package",
+      "ctaLabel": "Start listing",
+      "ctaHref": "/tools/seller-profile-manager?tab=listings",
+      "estimatedMinutes": 15,
+      "conditions": { "hasFirstListing": "no", "bankStatuses": ["approved", "under_review"] },
+      "enabled": true,
+      "createdAt": "2026-06-21T00:00:00.000Z",
+      "updatedAt": "2026-06-21T00:00:00.000Z"
+    },
+    {
+      "id": "tsk-first-order",
+      "title": "Get ready for your first order",
+      "description": "Review our quick-start playbook so you can ship your first sale within 24 hours.",
+      "urgency": "medium",
+      "icon": "ShoppingBag",
+      "ctaLabel": "Open playbook",
+      "ctaHref": "https://help.joinfleek.com/seller/first-order",
+      "estimatedMinutes": 4,
+      "conditions": { "hasFirstListing": "yes", "hasFirstOrder": "no" },
+      "enabled": true,
+      "createdAt": "2026-06-21T00:00:00.000Z",
+      "updatedAt": "2026-06-21T00:00:00.000Z"
+    },
+    {
+      "id": "tsk-fulfill-pending",
+      "title": "Fulfil your pending orders",
+      "description": "You have orders awaiting fulfilment. Ship soon to keep your performance metrics strong.",
+      "urgency": "high",
+      "icon": "Truck",
+      "ctaLabel": "Open orders",
+      "ctaHref": "/orders",
+      "estimatedMinutes": 10,
+      "conditions": { "hasFirstOrder": "yes" },
+      "enabled": true,
+      "createdAt": "2026-06-21T00:00:00.000Z",
+      "updatedAt": "2026-06-21T00:00:00.000Z"
+    },
+    {
+      "id": "tsk-understand-payments",
+      "title": "Understand how payouts work",
+      "description": "Learn when payouts happen, how holds work, and how to read your statement.",
+      "urgency": "low",
+      "icon": "Wallet",
+      "ctaLabel": "Read payout guide",
+      "ctaHref": "https://help.joinfleek.com/seller/payouts",
+      "estimatedMinutes": 3,
+      "conditions": { "hasFirstOrder": "yes", "hasReceivedPayout": "no" },
+      "enabled": true,
+      "createdAt": "2026-06-21T00:00:00.000Z",
+      "updatedAt": "2026-06-21T00:00:00.000Z"
+    },
+    {
+      "id": "tsk-grow-listings",
+      "title": "Grow your shop — add more listings",
+      "description": "Sellers with 50+ listings see 3× more orders. Add inventory to lift visibility.",
+      "urgency": "low",
+      "icon": "TrendingUp",
+      "ctaLabel": "Add listings",
+      "ctaHref": "/tools/seller-profile-manager?tab=listings",
+      "estimatedMinutes": 20,
+      "conditions": { "hasReceivedPayout": "yes", "lifecycles": ["active"] },
+      "enabled": true,
+      "createdAt": "2026-06-21T00:00:00.000Z",
+      "updatedAt": "2026-06-21T00:00:00.000Z"
+    }
+  ],
+  "announcements": [
+    {
+      "id": "anc-welcome-pilot",
+      "severity": "info",
+      "title": "Welcome to the Fleek seller portal pilot",
+      "body": "You're one of our first sellers to try the new homepage. Share feedback with your account manager any time.",
+      "ctaLabel": "Open feedback form",
+      "ctaHref": "https://help.joinfleek.com/seller/feedback",
+      "conditions": { "lifecycles": ["new", "active"] },
+      "startsAt": null,
+      "endsAt": null,
+      "dismissible": true,
+      "enabled": true,
+      "createdAt": "2026-06-21T00:00:00.000Z",
+      "updatedAt": "2026-06-21T00:00:00.000Z"
+    }
+  ],
+  "articles": [
+    {
+      "id": "art-getting-started",
+      "title": "Getting started on Fleek",
+      "summary": "A 5-minute tour of the seller portal — profile, listings, and your first payout.",
+      "href": "https://help.joinfleek.com/seller/getting-started",
+      "tag": "getting-started",
+      "order": 1,
+      "conditions": { "lifecycles": ["new"] },
+      "enabled": true,
+      "createdAt": "2026-06-21T00:00:00.000Z",
+      "updatedAt": "2026-06-21T00:00:00.000Z"
+    },
+    {
+      "id": "art-upload-products",
+      "title": "How to upload products",
+      "summary": "Photo, title, grade, and pricing tips that lift conversion.",
+      "href": "https://help.joinfleek.com/seller/listings",
+      "tag": "listings",
+      "order": 2,
+      "conditions": {},
+      "enabled": true,
+      "createdAt": "2026-06-21T00:00:00.000Z",
+      "updatedAt": "2026-06-21T00:00:00.000Z"
+    },
+    {
+      "id": "art-fulfil-orders",
+      "title": "Fulfilling your orders",
+      "summary": "Pickup, packaging, and labels — everything you need to ship.",
+      "href": "https://help.joinfleek.com/seller/fulfilment",
+      "tag": "listings",
+      "order": 3,
+      "conditions": {},
+      "enabled": true,
+      "createdAt": "2026-06-21T00:00:00.000Z",
+      "updatedAt": "2026-06-21T00:00:00.000Z"
+    },
+    {
+      "id": "art-payouts",
+      "title": "How payouts work",
+      "summary": "When you get paid, how to read your statement, and what causes a hold.",
+      "href": "https://help.joinfleek.com/seller/payouts",
+      "tag": "payouts",
+      "order": 4,
+      "conditions": {},
+      "enabled": true,
+      "createdAt": "2026-06-21T00:00:00.000Z",
+      "updatedAt": "2026-06-21T00:00:00.000Z"
+    },
+    {
+      "id": "art-support",
+      "title": "Talk to seller support",
+      "summary": "Have a question we did not cover? Reach the seller support team.",
+      "href": "https://help.joinfleek.com/seller/contact",
+      "tag": "support",
+      "order": 5,
+      "conditions": {},
+      "enabled": true,
+      "createdAt": "2026-06-21T00:00:00.000Z",
+      "updatedAt": "2026-06-21T00:00:00.000Z"
+    }
+  ]
+}

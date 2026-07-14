@@ -5,6 +5,11 @@ import path from 'path';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  server: {
+    // Local full-stack: run `vercel dev --listen 3300` alongside vite so the
+    // api/ functions (help-center content/upload, auth) are reachable in dev.
+    proxy: { '/api': 'http://localhost:3300' },
+  },
   optimizeDeps: {
     exclude: ['lucide-react'],
   },

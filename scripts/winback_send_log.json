@@ -1,0 +1,13 @@
+{
+  "ok": 1,
+  "fail": 0,
+  "notFound": [],
+  "blankMsg": [],
+  "results": [
+    {
+      "email": "killiandoherty6402@gmail.com",
+      "status": "sent",
+      "channel": "sendbird_group_channel_140562191_4915cec2a52a0fe59cf3cb3c8c126ba1948ba19f"
+    }
+  ]
+}

@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Supplier Self-Service Portal — Status Brief</title>
+<style>
+  @page { size: A4; margin: 14mm; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+    color: #1a1a1a;
+    font-size: 11pt;
+    line-height: 1.5;
+  }
+  header {
+    border-bottom: 2px solid #111;
+    padding-bottom: 8px;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  header h1 { margin: 0; font-size: 18pt; }
+  header .meta { font-size: 9.5pt; color: #555; text-align: right; }
+
+  h2 {
+    font-size: 13pt;
+    margin: 16px 0 6px;
+    color: #111;
+    border-left: 3px solid #2563eb;
+    padding-left: 8px;
+  }
+  h3 { font-size: 11pt; margin: 10px 0 4px; color: #222; }
+  p { margin: 4px 0 8px; }
+  ul { margin: 4px 0 8px 18px; padding: 0; }
+  li { margin: 3px 0; }
+
+  .lede {
+    background: #eff6ff;
+    border-left: 3px solid #2563eb;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 11pt;
+  }
+
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 10px; font-size: 10.5pt; }
+  th, td { border: 1px solid #d4d4d4; padding: 6px 9px; text-align: left; vertical-align: middle; }
+  th { background: #f3f4f6; font-weight: 600; }
+  td.group { background: #f9fafb; font-weight: 600; }
+
+  .pill {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 11px;
+    font-size: 9pt;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .pill.done { background: #dcfce7; color: #166534; }
+  .pill.part { background: #fef3c7; color: #92400e; }
+  .pill.todo { background: #fee2e2; color: #991b1b; }
+
+  .flow { display: flex; flex-direction: column; gap: 5px; margin: 8px 0 10px; }
+  .step { border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 6px; padding: 7px 11px; }
+  .step.decision { background: #fff7ed; border-color: #fdba74; font-weight: 600; text-align: center; }
+  .arrow { text-align: center; color: #94a3b8; font-size: 11pt; margin: 0; }
+  .branch { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .lane { border-radius: 6px; padding: 8px 11px; border: 1px solid; }
+  .lane.reject  { background: #fef2f2; border-color: #fecaca; }
+  .lane.approve { background: #f0fdf4; border-color: #bbf7d0; }
+  .lane h4 { margin: 0 0 4px; font-size: 10.5pt; }
+  .lane ul { margin: 2px 0 0 16px; }
+
+  .shots { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px; }
+  .shot { border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden; background: #fff; }
+  .shot img { display: block; width: 100%; height: 180px; object-fit: cover; object-position: top center; background: #f1f5f9; }
+  .shot .placeholder { height: 180px; background: #f1f5f9; color: #64748b; display: flex; align-items: center; justify-content: center; font-size: 10pt; text-align: center; padding: 8px; }
+  .shot .cap { padding: 6px 9px; font-size: 9.5pt; color: #334155; border-top: 1px solid #f1f5f9; }
+  .shot .cap b { color: #111; }
+
+  .page-break { page-break-before: always; }
+  .footer { margin-top: 14px; padding-top: 6px; border-top: 1px solid #e5e7eb; font-size: 9pt; color: #6b7280; text-align: center; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Supplier Self-Service Portal</h1>
+    <div style="font-size: 10pt; color: #555;">A simple status brief</div>
+  </div>
+  <div class="meta">
+    Owner: Syed Faez Hasan (Seller Experience)<br>
+    Date: 8 June 2026
+  </div>
+</header>
+
+<div class="lede">
+  <strong>In one line:</strong> a single place where sellers can see and update their own profile and bank account
+  details — instantly, 24/7 — instead of raising a support ticket.
+</div>
+
+<h2>1. What are we building?</h2>
+<p>A self-service tool inside the Fleek seller app, with two simple tabs:</p>
+<ul>
+  <li><strong>Profile</strong> — shop name, bio, profile picture, contact details, zone &amp; account status.</li>
+  <li><strong>Account &amp; Payments</strong> — current bank account, full history, and bank update requests.</li>
+</ul>
+<p>Sellers can update what they own. Seller Support reviews bank changes. Approved bank details flow into Fleek's Financial Portal.</p>
+
+<h2>2. Why does it matter?</h2>
+<ul>
+  <li>Sellers wait <strong>5 minutes to 24+ hours</strong> for the same task today, depending on when they ask.</li>
+  <li>There is <strong>no visible history</strong> — sellers and support both ask "which bank account is active right now?"</li>
+  <li>Bank / KYC is the <strong>#1 support theme</strong> — <strong>297 → 334 → 281 tickets</strong> in Mar / Apr / May '26 — almost all of which are self-serviceable from data we already hold.</li>
+  <li>Old process: <strong>Google Form + email chain</strong> for bank updates, with no status visibility for the seller.</li>
+</ul>
+
+<p style="margin-top:6px;font-size:10pt;color:#444;"><strong>Top ticket drivers (last 3 months) — and what this tool does about them:</strong></p>
+<table style="font-size:9.5pt;">
+  <thead>
+    <tr>
+      <th style="width:38%">Driver (L3 reason)</th>
+      <th style="width:14%">Mar</th>
+      <th style="width:14%">Apr</th>
+      <th style="width:14%">May</th>
+      <th style="width:20%">3-mo trend</th>
+      <th>Addressed by</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Bank account details update</td><td>119</td><td>133</td><td>146</td><td>↑ +23%</td><td>Account &amp; Payments tab (live)</td></tr>
+    <tr><td>Login credentials required</td><td>63</td><td>66</td><td>20</td><td>↓ −70% Apr→May ✅</td><td>Already mitigated</td></tr>
+    <tr><td>How to change profile picture</td><td>19</td><td>14</td><td>31</td><td>↑ rising again</td><td>Profile tab (live)</td></tr>
+    <tr><td>Seller KYC information</td><td>8</td><td>22</td><td>24</td><td>↑ +200% ⚠️</td><td>Bank history + admin audit log</td></tr>
+    <tr><td>Profile picture update</td><td>36</td><td>58</td><td>32</td><td>mixed</td><td>Profile tab + AI moderation (live)</td></tr>
+    <tr><td>Password update request</td><td>28</td><td>14</td><td>15</td><td>↓</td><td>Phase 2 — password self-serve</td></tr>
+    <tr><td>Shop name update</td><td>8</td><td>9</td><td>4</td><td>↓</td><td>Profile tab (live)</td></tr>
+    <tr><td>How to change shop name</td><td>6</td><td>8</td><td>3</td><td>↓</td><td>Profile tab (live)</td></tr>
+    <tr><td>Email address update</td><td>2</td><td>5</td><td>6</td><td>↑ slight</td><td>Profile tab — needs OTP (gap)</td></tr>
+    <tr><td>Bio update</td><td>3</td><td>1</td><td>0</td><td>✅ resolved</td><td>Profile tab (live)</td></tr>
+    <tr><td>Phone number update</td><td>2</td><td>4</td><td>0</td><td>✅ resolved</td><td>Profile tab — needs OTP (gap)</td></tr>
+    <tr><td>Unable to create account</td><td>3</td><td>0</td><td>0</td><td>✅ resolved</td><td>Out of scope</td></tr>
+    <tr><td style="font-weight:600">Total Bank / KYC theme</td><td style="font-weight:600">297</td><td style="font-weight:600">334</td><td style="font-weight:600">281</td><td>mixed</td><td></td></tr>
+  </tbody>
+</table>
+<p style="font-size:9.5pt;color:#555;margin-top:2px;">Source: CX ticketing L2 → L3 breakdown, Mar–May 2026. Once the write-path gaps in §5 are closed, the portal directly addresses categories representing <strong>~75–80% of the theme volume</strong>.</p>
+
+<h2>3. What is already done?</h2>
+
+<h3>Profile tab (live)</h3>
+<ul>
+  <li>Real shop name, bio, profile picture, email, phone, zone and status pulled live from Fleek's database.</li>
+  <li>Inline edit for shop name, bio and profile picture.</li>
+  <li><strong>AI moderation</strong> on profile pictures — blocks images containing phone numbers, emails, or external store links (disintermediation defense).</li>
+  <li>Mobile / Desktop view toggle.</li>
+</ul>
+
+<h3>Account &amp; Payments tab (live)</h3>
+<ul>
+  <li>Current bank account card with default badge.</li>
+  <li>Full <strong>history of every bank account</strong> the seller has ever used.</li>
+  <li><strong>View details</strong> on each row — address, account type, currency, bank code.</li>
+  <li>Active / Inactive labels, added &amp; deactivated dates, total active duration.</li>
+  <li>Country-aware bank update form with field validation and document upload.</li>
+  <li>Status badges: Submitted → Under Review → Approved / Rejected.</li>
+</ul>
+
+<h3>Internal admin tool (live)</h3>
+<ul>
+  <li>Seller Support queue, one-click Approve / Reject with reason, signed-URL access to documents, full audit log.</li>
+</ul>
+
+<h2>4. Current vs. desired state</h2>
+<table>
+  <thead>
+    <tr><th style="width:52%">Feature</th><th style="width:24%">Current</th><th style="width:24%">Desired</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="group" colspan="3">Profile</td></tr>
+    <tr><td>View profile data</td><td><span class="pill done">Available</span></td><td><span class="pill done">Available</span></td></tr>
+    <tr><td>Edit shop name, bio &amp; profile picture</td><td><span class="pill part">Saves on our side only</span></td><td><span class="pill done">Auto-syncs to Fleek vendor record</span></td></tr>
+    <tr><td>Edit email / phone (with OTP)</td><td><span class="pill todo">Not yet</span></td><td><span class="pill done">Available</span></td></tr>
+
+    <tr><td class="group" colspan="3">Bank account</td></tr>
+    <tr><td>Bank Account History</td><td><span class="pill done">Available</span></td><td><span class="pill done">Available</span></td></tr>
+    <tr><td>View Bank Details</td><td><span class="pill done">Available</span></td><td><span class="pill done">Available</span></td></tr>
+    <tr><td>Address Details</td><td><span class="pill done">Available</span></td><td><span class="pill done">Available</span></td></tr>
+    <tr><td>Active / Inactive Tracking</td><td><span class="pill part">Partial</span></td><td><span class="pill done">Complete</span></td></tr>
+    <tr><td>Activation &amp; Deactivation Dates</td><td><span class="pill done">Available</span></td><td><span class="pill done">Available</span></td></tr>
+    <tr><td>Default Payment Account Visibility</td><td><span class="pill done">Available</span></td><td><span class="pill done">Available</span></td></tr>
+    <tr><td>Approved bank → Fleek Financial Portal</td><td><span class="pill todo">Manual re-entry</span></td><td><span class="pill done">Auto-push</span></td></tr>
+  </tbody>
+</table>
+<p>Read-side is essentially done. The one remaining gap is the <strong>write path</strong> back to Fleek's canonical Vendor and Financial Portal systems.</p>
+
+<h2>5. What we need from Engineering</h2>
+<ol>
+  <li><strong>Platform API access</strong> — endpoint URL + service auth token so the portal can push edits back.</li>
+  <li><strong>Vendor update contract</strong> — confirmed mutation for shop name, bio &amp; picture changes.</li>
+  <li><strong>Bank account push</strong> — mutation that lands approved submissions in the Fleek Financial Portal automatically.</li>
+  <li><strong>OTP service</strong> for verifying email &amp; phone changes.</li>
+  <li><strong>PII retention policy</strong> — what we may safely store of account numbers and supporting documents.</li>
+</ol>
+<p>Our side is already scaffolded — once items 1–3 are provided, full wiring is <strong>under a day</strong> of work.</p>
+
+<div class="page-break"></div>
+
+<h2>6. How it works</h2>
+
+<h3>Profile update</h3>
+<div class="flow">
+  <div class="step">Seller edits shop name, bio or profile picture</div>
+  <div class="arrow">↓</div>
+  <div class="step">Validation + AI moderation on pictures (blocks phone, email, external links)</div>
+  <div class="arrow">↓</div>
+  <div class="step">Saved on our side → seller sees confirmation</div>
+  <div class="arrow">↓</div>
+  <div class="step">Pushed to Fleek's vendor record → visible everywhere (app, marketplace, internal tools)</div>
+</div>
+
+<h3>Bank account update</h3>
+<div class="flow">
+  <div class="step">Seller submits new bank account details</div>
+  <div class="arrow">↓</div>
+  <div class="step">Status: <em>Submitted</em> → enters Seller Support queue</div>
+  <div class="arrow">↓</div>
+  <div class="step">Seller Support reviews documents &amp; details (Status: <em>Under Review</em>)</div>
+  <div class="arrow">↓</div>
+  <div class="step decision">Decision</div>
+  <div class="branch">
+    <div class="lane reject">
+      <h4>If rejected</h4>
+      <ul>
+        <li>Seller is notified of the rejection</li>
+        <li>Existing bank account remains active</li>
+        <li>Seller can correct &amp; resubmit</li>
+      </ul>
+    </div>
+    <div class="lane approve">
+      <h4>If approved</h4>
+      <ul>
+        <li>Seller is notified</li>
+        <li>Details pushed to Fleek Financial Portal</li>
+        <li>New account becomes the default payment account (if applicable)</li>
+        <li>Historical records are retained</li>
+        <li>Seller can view details &amp; history in the tool</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<h2>7. Screenshots from the live tool</h2>
+<div class="shots">
+  <div class="shot">
+    <img src="screenshots/1-profile.png" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+    <div class="placeholder" style="display:none">[ Profile tab ]</div>
+    <div class="cap"><b>Profile tab</b> — shop name, bio, picture, contact &amp; status</div>
+  </div>
+  <div class="shot">
+    <img src="screenshots/2-moderation.png" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+    <div class="placeholder" style="display:none">[ Profile picture moderation ]</div>
+    <div class="cap"><b>Picture moderation</b> — AI rejects phone / email / external URLs</div>
+  </div>
+  <div class="shot">
+    <img src="screenshots/3-mobile-desktop.png" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+    <div class="placeholder" style="display:none">[ Mobile / Desktop toggle ]</div>
+    <div class="cap"><b>Mobile / Desktop toggle</b> — same portal, two layouts</div>
+  </div>
+  <div class="shot">
+    <img src="screenshots/4-bank-history.png" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+    <div class="placeholder" style="display:none">[ Bank account history ]</div>
+    <div class="cap"><b>Bank Account History</b> — all accounts, default badge</div>
+  </div>
+  <div class="shot">
+    <img src="screenshots/5-bank-details.png" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+    <div class="placeholder" style="display:none">[ Bank account details ]</div>
+    <div class="cap"><b>Bank Account Details</b> — address, dates, full timeline</div>
+  </div>
+  <div class="shot">
+    <img src="screenshots/6-approval.png" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+    <div class="placeholder" style="display:none">[ Approval journey ]</div>
+    <div class="cap"><b>Approval journey</b> — Submitted → Under Review → Approved</div>
+  </div>
+</div>
+
+<div class="footer">
+  Fleek · Seller Experience · Supplier Self-Service Portal · Internal stakeholder brief
+</div>
+
+</body>
+</html>

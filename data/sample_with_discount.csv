@@ -1,0 +1,7 @@
+A_id,B_email,C_first_name,D_discount,E,F,G,H,I,J_products
+1001,Ava.Lee@example.com,Ava,WELCOME15,x,x,x,x,x,"https://joinfleek.com/p/red-dress
+https://joinfleek.com/p/blue-jeans"
+1002,noah@example.com,Noah,SAVE20,x,x,x,x,x,https://joinfleek.com/p/white-tee
+1003,not-an-email,Mia,SAVE20,x,x,x,x,x,https://joinfleek.com/p/x
+1004,liam@example.com,Liam,,x,x,x,x,x,https://joinfleek.com/p/shoes
+1005,ava.lee@example.com,Ava,WELCOME15,x,x,x,x,x,https://joinfleek.com/p/dup
