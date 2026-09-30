@@ -79,7 +79,7 @@ export default function MediaTab({ readonly }: { readonly: boolean }) {
   return (
     <>
       <div className="hcm-note">
-        Images ≤ 4 MB · videos ≤ 15 MB (H.264 720p, silent-demo style) · PDFs ≤ 10 MB. Stored in this browser (IndexedDB) for the pilot;
+        Images ≤ 4 MB · videos ≤ 50 MB (H.264 720p, silent-demo style) · PDFs ≤ 10 MB. Stored in this browser (IndexedDB) for the pilot;
         on FleekOS the same library uploads to object storage + CDN — nothing about articles changes because blocks
         reference assets by id, not by file.
       </div>
