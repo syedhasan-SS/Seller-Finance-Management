@@ -29,7 +29,7 @@ const DB_NAME = 'fleek-hc-media';
 const STORE = 'assets';
 const EVENT = 'uni-media-changed';
 
-export const MAX_VIDEO_BYTES = 15 * 1024 * 1024; // 15 MB — PRD rule
+export const MAX_VIDEO_BYTES = 50 * 1024 * 1024; // 50 MB
 export const MAX_IMAGE_BYTES = 4 * 1024 * 1024; // 4 MB
 export const MAX_PDF_BYTES = 10 * 1024 * 1024; // 10 MB
 
@@ -68,7 +68,7 @@ export async function saveAsset(file: File, alt = ''): Promise<{ ok: true; asset
   const isImage = file.type.startsWith('image/');
   const isPdf = file.type === 'application/pdf';
   if (!isVideo && !isImage && !isPdf) return { ok: false, message: 'Only images, videos and PDFs are supported.' };
-  if (isVideo && file.size > MAX_VIDEO_BYTES) return { ok: false, message: 'Video too large — max 15 MB (compress to H.264 720p).' };
+  if (isVideo && file.size > MAX_VIDEO_BYTES) return { ok: false, message: 'Video too large — max 50 MB (compress to H.264 720p).' };
   if (isImage && file.size > MAX_IMAGE_BYTES) return { ok: false, message: 'Image too large — max 4 MB.' };
   if (isPdf && file.size > MAX_PDF_BYTES) return { ok: false, message: 'PDF too large — max 10 MB.' };
 

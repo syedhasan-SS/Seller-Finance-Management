@@ -9,7 +9,7 @@ import './manager.css';
 import { useAuth } from '@/contexts/AuthContext';
 import { topics, updates as seedUpdates, type ArticleBlock, type Update } from './data';
 import { textToBlocks } from './importText';
-import { listAssets, subscribeMedia, type MediaAsset } from './media';
+import { listAssets, saveAsset, subscribeMedia, type MediaAsset } from './media';
 import MediaTab from './MediaTab';
 import RichText from './RichText';
 import { sanitizeHtml } from './sanitize';
@@ -42,6 +42,11 @@ function useRerenderOnStore() {
 
 type AssetKind = 'image' | 'video' | 'pdf';
 const kindPrefix: Record<AssetKind, string> = { image: 'image/', video: 'video/', pdf: 'application/pdf' };
+const kindAccept: Record<AssetKind, string> = {
+  image: 'image/*',
+  video: 'video/mp4,video/webm',
+  pdf: 'application/pdf',
+};
 
 function useMediaAssets(kind?: AssetKind): MediaAsset[] {
   const [assets, setAssets] = useState<MediaAsset[]>([]);
@@ -53,18 +58,40 @@ function useMediaAssets(kind?: AssetKind): MediaAsset[] {
   return kind ? assets.filter((a) => a.mime.startsWith(kindPrefix[kind])) : assets;
 }
 
-/** Asset dropdown used by image, video & PDF block editors. */
+/** Asset dropdown + inline upload, used by image, video & PDF block editors. */
 function AssetPicker({ kind, value, onChange }: { kind: AssetKind; value?: string; onChange: (id: string) => void }) {
   const assets = useMediaAssets(kind);
+  const [busy, setBusy] = useState(false);
   return (
-    <select value={value ?? ''} onChange={(e) => onChange(e.target.value)} style={{ width: '100%' }}>
-      <option value="">{assets.length ? `— pick a ${kind} from the library —` : `no ${kind}s uploaded yet (Media tab)`}</option>
-      {assets.map((a) => (
-        <option key={a.id} value={a.id}>
-          {a.name} ({Math.round(a.size / 1024)} KB)
-        </option>
-      ))}
-    </select>
+    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+      <select value={value ?? ''} onChange={(e) => onChange(e.target.value)} style={{ flex: 1, minWidth: 0 }}>
+        <option value="">{assets.length ? `— pick a ${kind} from the library —` : `no ${kind}s uploaded yet — upload one →`}</option>
+        {assets.map((a) => (
+          <option key={a.id} value={a.id}>
+            {a.name} ({Math.round(a.size / 1024)} KB)
+          </option>
+        ))}
+      </select>
+      <label className="hcm-btn hcm-btn--ghost hcm-btn--sm" style={{ whiteSpace: 'nowrap', cursor: busy ? 'default' : 'pointer' }}>
+        {busy ? 'Uploading…' : `＋ Upload ${kind}`}
+        <input
+          type="file"
+          accept={kindAccept[kind]}
+          disabled={busy}
+          style={{ display: 'none' }}
+          onChange={async (e) => {
+            const file = e.target.files?.[0];
+            e.target.value = '';
+            if (!file) return;
+            setBusy(true);
+            const res = await saveAsset(file);
+            setBusy(false);
+            if (res.ok) onChange(res.asset.id);
+            else window.alert(res.message);
+          }}
+        />
+      </label>
+    </div>
   );
 }
 

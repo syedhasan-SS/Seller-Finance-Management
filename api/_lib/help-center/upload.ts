@@ -1,6 +1,6 @@
 /**
  * Media upload — client-direct uploads to Vercel Blob (files bypass the
- * 4.5 MB serverless request cap, so 15 MB videos work).
+ * 4.5 MB serverless request cap, so 50 MB videos work).
  *
  * The browser calls @vercel/blob/client upload() pointing here; we verify the
  * admin JWT passed in clientPayload before issuing the upload token.
@@ -9,7 +9,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
 import { verifyToken } from '../auth';
 
-const MAX_BYTES = 15 * 1024 * 1024;
+const MAX_BYTES = 50 * 1024 * 1024;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
